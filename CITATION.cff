@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite them as below."
+title: "Does AI materials discovery lean on critical raw materials? An audit of GNoME: code and results"
+type: software
+authors:
+  - family-names: Mushtaq
+    given-names: Mohammad Haris
+version: 1.0.0
+date-released: 2026-10-04
+license: MIT
+repository-code: "https://github.com/YOUR-USERNAME/gnome-critical-materials-audit"
+keywords:
+  - critical raw materials
+  - GNoME
+  - materials discovery
+  - supply risk
+  - rare earths
+  - machine learning audit

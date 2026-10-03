@@ -1,0 +1,13 @@
+# Python 3.10+ (Google Colab default works). Installed automatically in Colab by the notebook.
+numpy
+pandas
+scipy
+matplotlib
+scikit-learn
+pyarrow
+pymatgen
+mp-api
+fsspec
+aiohttp
+ase
+# Optional, only for Level 4 (GPU):  mace-torch  or  chgnet

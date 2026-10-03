@@ -1,0 +1,58 @@
+result,value,ci
+crm_eu_atom GNoME vs known (matched on s_n),0.627 vs 0.194,"diff 0.433 [0.430, 0.435]"
+crm_eu_atom GNoME vs known (matched on s_n_class),0.626 vs 0.461,"diff 0.165 [0.151, 0.179]"
+crm_us_atom GNoME vs known (matched on s_n),0.625 vs 0.173,"diff 0.452 [0.450, 0.454]"
+crm_us_atom GNoME vs known (matched on s_n_class),0.625 vs 0.405,"diff 0.219 [0.206, 0.233]"
+crm_eu_mass GNoME vs known (matched on s_n),0.710 vs 0.332,"diff 0.378 [0.374, 0.381]"
+crm_eu_mass GNoME vs known (matched on s_n_class),0.709 vs 0.579,"diff 0.130 [0.095, 0.166]"
+has_ree GNoME vs known (matched on s_n),0.768 vs 0.216,"diff 0.553 [0.547, 0.558]"
+has_ree GNoME vs known (matched on s_n_class),0.768 vs 0.600,"diff 0.168 [0.143, 0.192]"
+has_f_in_core GNoME vs known (matched on s_n),0.660 vs 0.113,"diff 0.548 [0.543, 0.552]"
+has_f_in_core GNoME vs known (matched on s_n_class),0.660 vs 0.333,"diff 0.327 [0.062, 0.592]"
+has_pgm GNoME vs known (matched on s_n),0.466 vs 0.067,"diff 0.399 [0.395, 0.402]"
+has_pgm GNoME vs known (matched on s_n_class),0.464 vs 0.137,"diff 0.328 [0.306, 0.349]"
+hhi_p GNoME vs known (matched on s_n),4924.675 vs 1872.390,"diff 3052.286 [3040.248, 3064.324]"
+hhi_p GNoME vs known (matched on s_n_class),4921.063 vs 3428.170,"diff 1492.893 [1437.242, 1548.544]"
+share of crm_eu_atom gap from chemistry mix,0.43,"(0.380, 0.745)"
+share of crm_us_atom gap from chemistry mix,0.23,"(0.181, 0.414)"
+share of has_ree gap from chemistry mix,0.64,"(0.319, 0.685)"
+share of has_f_in_core gap from chemistry mix,0.32,"(0.013, 0.637)"
+share of hhi_p gap from chemistry mix,0.31,"(0.180, 0.333)"
+amplification slope (GNoME bias vs computed-MP bias),0.56,"(np.float64(-0.09615650318425913), np.float64(1.1079173846775303))"
+"rare earths: observed / random-choice expectation, GNoME",1.24,
+"rare earths: observed / random-choice expectation, MP_known",0.59,
+"rare earths: observed / random-choice expectation, MP_theoretical",0.45,
+"rare earths: observed / random-choice expectation, EXT_MP",0.91,
+"rare earths: observed / random-choice expectation, EXT_CODED",0.83,
+"EU critical: observed / random-choice expectation, GNoME",1.02,
+"EU critical: observed / random-choice expectation, MP_known",0.89,
+"EU critical: observed / random-choice expectation, MP_theoretical",0.96,
+"EU critical: observed / random-choice expectation, EXT_MP",1.01,
+"EU critical: observed / random-choice expectation, EXT_CODED",0.96,
+odds of thin margin (<10 meV) with f-in-core,1.81,"[1.78, 1.83]"
+odds of thin margin (<25 meV) with f-in-core,1.83,"[1.81, 1.85]"
+odds of r2SCAN instability (>0.001 eV) with f-in-core,0.77,"[0.74, 0.80]"
+odds of r2SCAN instability (>0.025 eV) with f-in-core,0.49,"[0.46, 0.52]"
+"EU critical share, cathode shortlist vs known",0.428 vs 0.195,"[0.228, 0.238]"
+"EU critical share, perovskite shortlist vs known",0.267 vs 0.177,"[0.084, 0.095]"
+"EU critical share, thermoelectric shortlist vs known",0.622 vs 0.210,"[0.405, 0.418]"
+china_frac (USGS 2025) GNoME vs known (matched on s_n_class),0.403 vs 0.376,"diff 0.027 [0.020, 0.034]"
+conc_frac (USGS 2025) GNoME vs known (matched on s_n_class),0.678 vs 0.519,"diff 0.159 [0.141, 0.177]"
+hhi_new (USGS 2025) GNoME vs known (matched on s_n_class),4231.000 vs 3776.804,"diff 454.197 [391.782, 516.611]"
+cathode (Al): high-risk share / with lower-risk alternative / top-10 loss,0.74 / 1.00 / 0.000 fraction,n=5169
+cathode (Ca): high-risk share / with lower-risk alternative / top-10 loss,0.01 / 1.00 / 0.000 fraction,n=887
+cathode (Cs): high-risk share / with lower-risk alternative / top-10 loss,0.13 / 1.00 / 0.000 fraction,n=3322
+cathode (K): high-risk share / with lower-risk alternative / top-10 loss,0.26 / 1.00 / 0.000 fraction,n=896
+cathode (Li): high-risk share / with lower-risk alternative / top-10 loss,0.08 / 0.96 / 0.074 fraction,n=312
+cathode (Mg): high-risk share / with lower-risk alternative / top-10 loss,0.47 / 1.00 / 0.000 fraction,n=743
+cathode (Na): high-risk share / with lower-risk alternative / top-10 loss,0.23 / 1.00 / 0.000 fraction,n=520
+cathode (Rb): high-risk share / with lower-risk alternative / top-10 loss,0.10 / 1.00 / 0.000 fraction,n=2506
+cathode (Y): high-risk share / with lower-risk alternative / top-10 loss,0.27 / 1.00 / 0.001 fraction,n=1792
+perovskite (mixed): high-risk share / with lower-risk alternative / top-10 loss,0.03 / 1.00 / 0.001 eV from 1.34,n=2852
+perovskite (pure): high-risk share / with lower-risk alternative / top-10 loss,0.03 / 1.00 / 0.000 eV from 1.34,n=2852
+thermoelectric (300K): high-risk share / with lower-risk alternative / top-10 loss,0.60 / 1.00 / 0.000 fraction,n=8261
+thermoelectric (430K): high-risk share / with lower-risk alternative / top-10 loss,0.60 / 1.00 / 0.000 fraction,n=5486
+thermoelectric (560K): high-risk share / with lower-risk alternative / top-10 loss,0.59 / 1.00 / 0.007 fraction,n=4969
+thermoelectric (690K): high-risk share / with lower-risk alternative / top-10 loss,0.61 / 1.00 / 0.025 fraction,n=6080
+thermoelectric (820K): high-risk share / with lower-risk alternative / top-10 loss,0.58 / 1.00 / 0.017 fraction,n=4400
+thermoelectric (950K): high-risk share / with lower-risk alternative / top-10 loss,0.58 / 1.00 / 0.011 fraction,n=4027

@@ -1,0 +1,6 @@
+cache/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.parquet
+crm_audit_results.zip

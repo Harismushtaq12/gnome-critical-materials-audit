@@ -1,0 +1,8 @@
+{
+  "title": "Does AI materials discovery lean on critical raw materials? An audit of GNoME: code and results",
+  "upload_type": "software",
+  "description": "Code and result tables for an audit of Google DeepMind's GNoME dataset. It tests whether AI-discovered materials use critical, supply-risky elements more often than known materials, why this happens, and whether it matters for application shortlists. Runs in Google Colab using only public data.",
+  "creators": [{"name": "Mushtaq, Mohammad Haris"}],
+  "license": "MIT",
+  "keywords": ["critical raw materials", "GNoME", "materials discovery", "supply risk", "rare earths", "machine learning audit"]
+}
