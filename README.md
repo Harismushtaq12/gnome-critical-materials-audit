@@ -37,7 +37,7 @@ The limits of the study are listed in the paper and in [`docs/LIMITS.md`](docs/L
 ## Interactive results page
 
 Explore the results in your browser (periodic table, applications, countries):
-**https://YOUR-USERNAME.github.io/gnome-critical-materials-audit/**
+**https://harismushtaq12.github.io/gnome-critical-materials-audit/**
 
 The page is the single file `docs/index.html`. It needs no installation.
 
