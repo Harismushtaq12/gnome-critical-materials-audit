@@ -1,6 +1,7 @@
 # Results
 
-Tables (CSV) and figures (PNG) from the paper run (real data, 3 October 2026).
+Tables (CSV) and figures (PNG) from the paper run (real data, 3 October 2026). The `R` files come from the revision
+run of 10 October 2026 (notebook Level 5), which reused the same saved data; all other files of that run were identical.
 "Known" means experimentally known materials in the Materials Project (`MP_known`).
 "Matched" means the reference group is re-weighted to GNoME's mix of compound types.
 
@@ -32,7 +33,7 @@ Tables (CSV) and figures (PNG) from the paper run (real data, 3 October 2026).
 
 | File | Section | What it shows |
 |---|---|---|
-| `HEADLINE.csv` | 22 | The main numbers quoted in the paper |
+| `HEADLINE.csv` | 23 | Summary of the main numbers |
 | `L1_testA_grid.csv` | 6 | GNoME vs each reference group, every measure and matching level |
 | `L1_testA_capped.csv` | 6b | The same, with 5+-element compounds grouped |
 | `L1_testA_common_support.csv` | 6b | **Main comparison**: only where at least 100 reference compounds exist (72.6% of GNoME) |
@@ -50,7 +51,16 @@ Tables (CSV) and figures (PNG) from the paper run (real data, 3 October 2026).
 | `L3_alternatives_v2.csv` | 17 | **Final design**: lower-risk alternatives with similar predicted performance |
 | `X_list_check.csv`, `X_big_region.csv`, `X_r2scan_subset.csv`, `X_margins_mp_oqmd.csv` | 21 | Extra checks for the limits |
 | `null_calibration.csv` | 20 | False-alarm rate of each test on fake data with no effect |
-| `run_log.csv` | 22 | Settings of each run |
+| `run_log.csv` | 23 | Settings of each run |
+| `R0_values_for_paper.csv` | Level 5 | The revision numbers quoted in the paper, one line per check |
+| `R1_cutoff_sweep.csv` | R1 | Main comparison with cut-offs of 100, 300, 500 and 1000 known compounds per type, and without the 4-element metal-only type |
+| `R2_cluster_gaps.csv`, `R2_cluster_odds_ratios.csv` | R2 | Intervals with near-copies resampled together (cluster bootstrap, 1000 samples) |
+| `R3_shortlists_type_matched.csv` | R3 | Application shortlists vs known materials matched by compound type |
+| `R4_alternatives_strict.csv` | R4 | Lower-risk alternatives under stricter rules (confidence at least 0.9, same compound type) |
+| `R5_robustness_common_support.csv` | R5 | Duplicates removed, radioactive elements removed and crystal system added, on the common support |
+| `R6_element_ratios_type_matched.csv` | R6 | Element-by-element ratios with compound-type weights (1000 bootstrap samples) |
+| `R7_decomposition_both_orders.csv` | R7 | Gap decomposition with both weight orders and their average |
+| `R8_margins_density_control.csv` | R8 | Stability odds ratios with the number of MP entries per chemical system in the strata |
 | `fig1_headline.png` … `fig8_alternatives.png` | — | Figures 1–8 |
 
 Note: in the paper run, the extra checks (section 21) and the final alternatives design were run after the first

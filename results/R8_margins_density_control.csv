@@ -1,0 +1,11 @@
+flag,measure,value_with,value_without,ci_low,ci_high
+has_f_in_core,median MP entries in chemical system (with / without),86.0,88.0,,
+has_f_in_core,"odds ratio, margin < 10 meV/atom, strata: type only (as in paper)",1.8068685053806688,,1.7813976224114367,1.8327035776084193
+has_f_in_core,"odds ratio, margin < 10 meV/atom, strata: type x MP-density quartile",1.8471670562024887,,1.8203491878391176,1.874380012534893
+has_f_in_core,"odds ratio, margin < 25 meV/atom, strata: type only (as in paper)",1.827753070912112,,1.806302278100125,1.8494586032092013
+has_f_in_core,"odds ratio, margin < 25 meV/atom, strata: type x MP-density quartile",1.9107102189270224,,1.8876364532612329,1.9340660297191814
+has_ree,median MP entries in chemical system (with / without),85.0,92.0,,
+has_ree,"odds ratio, margin < 10 meV/atom, strata: type only (as in paper)",1.556522307410064,,1.5318023704698016,1.5816411700173125
+has_ree,"odds ratio, margin < 10 meV/atom, strata: type x MP-density quartile",1.5933599804380212,,1.5673460186356727,1.6198057079134296
+has_ree,"odds ratio, margin < 25 meV/atom, strata: type only (as in paper)",1.6164071356213414,,1.5952513198822578,1.6378435143877097
+has_ree,"odds ratio, margin < 25 meV/atom, strata: type x MP-density quartile",1.6958484209213185,,1.6730563095601976,1.7189510301044968
