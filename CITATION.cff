@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this code or these results, please cite them as below."
-title: "Does AI materials discovery lean on critical raw materials? An audit of GNoME: code and results"
+title: "Rare-earth and platinum-group metals in AI-predicted crystals: an audit of the GNoME dataset (code and results)"
 type: software
 authors:
   - family-names: Mushtaq
     given-names: Mohammad Haris
-version: 1.0.0
-date-released: 2026-10-04
+version: 1.1.0
+date-released: 2026-10-10
 license: MIT
 repository-code: "https://github.com/Harismushtaq12/gnome-critical-materials-audit"
 keywords:

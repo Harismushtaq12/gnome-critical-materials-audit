@@ -1,18 +1,18 @@
-# Does AI materials discovery lean on critical raw materials?
+# Rare-earth and platinum-group metals in AI-predicted crystals: an audit of the GNoME dataset
 
-Code and results for an audit of Google DeepMind's **GNoME** dataset, about 554,000 computed stable materials.
+Code and results for an audit of Google DeepMind's **GNoME** dataset of 554,054 AI-predicted stable crystals.
 The study asks two things:
 
-1. Are GNoME's materials made of critical, supply-risky elements (for example rare earths and platinum-group metals)
+1. Do GNoME's materials contain critical, supply-risky elements (for example rare earths and platinum-group metals)
    more often than known materials?
-2. If so, why, and does it matter for real applications?
+2. If so, where does the excess come from, and does it reach real application shortlists?
 
 Everything uses public data and runs in Google Colab on a normal laptop. No lab work and no GPU are needed.
 
-## Main findings (paper run, 3 October 2026)
+## Main findings
 
 Fair comparison means GNoME is compared with known materials that have the same number of elements and the same
-chemistry type. It covers 72.6% of GNoME.
+chemistry type, using only compound types with at least 100 known examples. It covers 72.6% of GNoME.
 
 | Measure | GNoME | Known materials |
 |---|---|---|
@@ -21,16 +21,25 @@ chemistry type. It covers 72.6% of GNoME.
 | Contains a rare earth | 72% | 45% |
 | Contains a lanthanide with frozen 4f electrons in standard DFT | 60% | 27% |
 | Contains a platinum-group metal | 41% | 19% |
-| Supply concentration (HHI, 2011 data) | 4,808 | 3,171 |
+| Supply concentration (HHI, USGS 2025, 0 to 10,000) | 4,174 | 3,723 |
 
 Other results (all in `results/`):
 
-- GNoME uses rare earths more often than random element choice would (1.24×). Known materials use them less often (0.59×).
-- Rare-earth-containing GNoME materials are closer to the stability limit (odds ratio 1.83).
-- In application shortlists (battery cathodes, solar perovskites, thermoelectrics), critical-element shares are
-  about 1.5 to 3 times those of known materials. For 93–100% of high-risk candidates, a lower-risk candidate with
-  similar predicted performance exists. Lithium cathodes are the exception: there, high-risk candidates are predicted to perform better
-  (median 442 vs 186 Wh/kg).
+- The rare-earth excess remains against other computed databases; the platinum-group excess is shared with them.
+- Known materials use rare earths less often than a random choice of elements would (0.59×), and GNoME more often
+  (1.24×), so the gap reflects both experimental practice and an excess in the dataset.
+- Materials with frozen-4f lanthanides are closer to the stability limit (odds ratio 1.83; 1.62 for all rare earths).
+- Application shortlists (battery cathodes, solar perovskites, thermoelectrics) also contain more critical elements,
+  but with compound-type matching the gaps are much smaller. In most shortlists, candidates with fewer critical
+  elements reach similar predicted performance; lithium cathodes are the exception (median 442 vs 186 Wh/kg).
+
+### Checks added in revision (10 October 2026)
+
+Level 5 of the notebook (files `R1` to `R8` in `results/`) tests the main result in eight ways. It holds without the
+thin 4-element metal-only type (rare-earth gap +0.301), with near-copies resampled together (95% CI 0.215 to 0.328),
+and after removing duplicates or radioactive elements. Some results are smaller with stricter matching: the
+largest element ratios fall sharply, shortlist gaps shrink, and for cathodes close alternatives of the same compound type are
+often missing.
 
 The limits of the study are listed in the paper and in [`docs/LIMITS.md`](docs/LIMITS.md).
 
@@ -53,18 +62,22 @@ The page is the single file `docs/index.html`. It needs no installation.
    - The first run downloads about 2 GB and takes a few hours. Downloads and the main table are saved to
      Google Drive (`crm_audit_cache`), so later runs are much faster.
 4. All tables (CSV) and figures (PNG) are written to `results/` and downloaded as a zip at the end.
+5. **Revision checks only:** keep `USE_CHECKPOINT = True`, run sections 1 to 5 (they reload the saved table from
+   Google Drive), then run the Level 5 cells (R1 to R8). The last cell prints the values used in the paper and saves
+   `results/R0_values_for_paper.csv`.
 
-The notebook writes its own code files (`crm_audit.py`, `crm_v2.py`, `crm_v3.py`) at the start, so it runs on its own.
+The notebook writes its own code files (`crm_audit.py`, `crm_v2.py`, `crm_v3.py`, and `crm_rev.py` for Level 5) as it runs, so it runs on its own.
 The same files are in `src/` for easy reading.
 
 Results can change slightly if the online databases are updated. The paper run used the versions available on
-3 October 2026.
+3 October 2026; the revision run of 10 October 2026 reused the same saved data, and all its main result files are
+identical to those of the paper run.
 
 ## What is in this repository
 
 | Path | What it is |
 |---|---|
-| `critical_element_audit.ipynb` | The full analysis, from download to final tables, in 22 sections |
+| `critical_element_audit.ipynb` | The full analysis, from download to final tables, including the Level 5 revision checks |
 | `src/` | The analysis code as plain Python files (the same code the notebook writes) |
 | `results/` | All result tables and figures from the paper run. See [`results/README.md`](results/README.md) |
 | `docs/LIMITS.md` | Known limits of the study and the checks done on them |

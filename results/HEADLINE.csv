@@ -39,20 +39,36 @@ odds of r2SCAN instability (>0.025 eV) with f-in-core,0.49,"[0.46, 0.52]"
 china_frac (USGS 2025) GNoME vs known (matched on s_n_class),0.403 vs 0.376,"diff 0.027 [0.020, 0.034]"
 conc_frac (USGS 2025) GNoME vs known (matched on s_n_class),0.678 vs 0.519,"diff 0.159 [0.141, 0.177]"
 hhi_new (USGS 2025) GNoME vs known (matched on s_n_class),4231.000 vs 3776.804,"diff 454.197 [391.782, 516.611]"
-cathode (Al): high-risk share / with lower-risk alternative / top-10 loss,0.74 / 1.00 / 0.000 fraction,n=5169
-cathode (Ca): high-risk share / with lower-risk alternative / top-10 loss,0.01 / 1.00 / 0.000 fraction,n=887
-cathode (Cs): high-risk share / with lower-risk alternative / top-10 loss,0.13 / 1.00 / 0.000 fraction,n=3322
-cathode (K): high-risk share / with lower-risk alternative / top-10 loss,0.26 / 1.00 / 0.000 fraction,n=896
-cathode (Li): high-risk share / with lower-risk alternative / top-10 loss,0.08 / 0.96 / 0.074 fraction,n=312
-cathode (Mg): high-risk share / with lower-risk alternative / top-10 loss,0.47 / 1.00 / 0.000 fraction,n=743
-cathode (Na): high-risk share / with lower-risk alternative / top-10 loss,0.23 / 1.00 / 0.000 fraction,n=520
-cathode (Rb): high-risk share / with lower-risk alternative / top-10 loss,0.10 / 1.00 / 0.000 fraction,n=2506
-cathode (Y): high-risk share / with lower-risk alternative / top-10 loss,0.27 / 1.00 / 0.001 fraction,n=1792
-perovskite (mixed): high-risk share / with lower-risk alternative / top-10 loss,0.03 / 1.00 / 0.001 eV from 1.34,n=2852
-perovskite (pure): high-risk share / with lower-risk alternative / top-10 loss,0.03 / 1.00 / 0.000 eV from 1.34,n=2852
-thermoelectric (300K): high-risk share / with lower-risk alternative / top-10 loss,0.60 / 1.00 / 0.000 fraction,n=8261
-thermoelectric (430K): high-risk share / with lower-risk alternative / top-10 loss,0.60 / 1.00 / 0.000 fraction,n=5486
-thermoelectric (560K): high-risk share / with lower-risk alternative / top-10 loss,0.59 / 1.00 / 0.007 fraction,n=4969
-thermoelectric (690K): high-risk share / with lower-risk alternative / top-10 loss,0.61 / 1.00 / 0.025 fraction,n=6080
-thermoelectric (820K): high-risk share / with lower-risk alternative / top-10 loss,0.58 / 1.00 / 0.017 fraction,n=4400
-thermoelectric (950K): high-risk share / with lower-risk alternative / top-10 loss,0.58 / 1.00 / 0.011 fraction,n=4027
+"crm_eu_atom GNoME vs known, common support (72.6% of GNoME)",0.590 vs 0.515,"diff 0.075 [0.055, 0.094]"
+"crm_us_atom GNoME vs known, common support (72.6% of GNoME)",0.607 vs 0.439,"diff 0.168 [0.149, 0.187]"
+"has_ree GNoME vs known, common support (72.6% of GNoME)",0.719 vs 0.451,"diff 0.268 [0.234, 0.302]"
+"has_f_in_core GNoME vs known, common support (72.6% of GNoME)",0.597 vs 0.271,"diff 0.326 [0.294, 0.359]"
+"has_pgm GNoME vs known, common support (72.6% of GNoME)",0.414 vs 0.187,"diff 0.226 [0.197, 0.256]"
+"hhi_p GNoME vs known, common support (72.6% of GNoME)",4808.132 vs 3171.120,"diff 1637.012 [1562.789, 1711.234]"
+share of crm_eu_atom gap from chemistry mix (common support),0.71,"(0.631, 0.776)"
+share of crm_us_atom gap from chemistry mix (common support),0.37,"(0.304, 0.439)"
+share of has_ree gap from chemistry mix (common support),0.35,"(0.281, 0.428)"
+share of has_f_in_core gap from chemistry mix (common support),0.22,"(0.140, 0.307)"
+share of has_pgm gap from chemistry mix (common support),0.23,"(0.126, 0.314)"
+share of hhi_p gap from chemistry mix (common support),0.20,"(0.162, 0.239)"
+"hhi_new (USGS 2025) GNoME vs known, common support",4173.921 vs 3722.841,"diff 451.079 [365.629, 536.530]"
+"china_frac (USGS 2025) GNoME vs known, common support",0.403 vs 0.342,"diff 0.061 [0.051, 0.070]"
+"conc_frac (USGS 2025) GNoME vs known, common support",0.659 vs 0.527,"diff 0.132 [0.107, 0.157]"
+"top_share_max (USGS 2025) GNoME vs known, common support",0.730 vs 0.714,"diff 0.016 [0.006, 0.025]"
+cathode (Al): high-risk share / with >=1 lower-risk alternative,0.75 / 1.00,n=5117
+cathode (Ca): high-risk share / with >=1 lower-risk alternative,0.01 / 1.00,n=878
+cathode (Cs): high-risk share / with >=1 lower-risk alternative,0.13 / 1.00,n=3288
+cathode (K): high-risk share / with >=1 lower-risk alternative,0.26 / 1.00,n=887
+cathode (Li): high-risk share / with >=1 lower-risk alternative,0.07 / 0.96,n=308
+cathode (Mg): high-risk share / with >=1 lower-risk alternative,0.48 / 0.93,n=735
+cathode (Na): high-risk share / with >=1 lower-risk alternative,0.23 / 0.98,n=514
+cathode (Rb): high-risk share / with >=1 lower-risk alternative,0.10 / 1.00,n=2480
+cathode (Y): high-risk share / with >=1 lower-risk alternative,0.27 / 1.00,n=1774
+perovskite (mixed): high-risk share / with >=1 lower-risk alternative,0.03 / 1.00,n=2823
+perovskite (pure): high-risk share / with >=1 lower-risk alternative,0.03 / 1.00,n=2823
+thermoelectric (300K): high-risk share / with >=1 lower-risk alternative,0.60 / 1.00,n=8178
+thermoelectric (430K): high-risk share / with >=1 lower-risk alternative,0.60 / 1.00,n=5431
+thermoelectric (560K): high-risk share / with >=1 lower-risk alternative,0.60 / 1.00,n=4919
+thermoelectric (690K): high-risk share / with >=1 lower-risk alternative,0.61 / 1.00,n=6019
+thermoelectric (820K): high-risk share / with >=1 lower-risk alternative,0.59 / 1.00,n=4356
+thermoelectric (950K): high-risk share / with >=1 lower-risk alternative,0.59 / 1.00,n=3986

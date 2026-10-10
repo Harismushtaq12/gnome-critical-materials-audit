@@ -2,528 +2,618 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Interactive results of an audit of critical raw materials in Google DeepMind's GNoME dataset.">
-<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-</head>
-<body>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GNoME Critical Elements Audit</title>
+<meta name="description" content="Interactive results of an audit of the GNoME dataset of AI-predicted crystals for rare-earth and platinum-group metals and supply concentration.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Layout: one reading column; a periodic table as the centrepiece; every chart drawn from the paper-run CSVs. */
-:root {
-  --bg: #f5f6f8; --surface: #ffffff; --ink: #17202a; --muted: #586472; --line: #d8dde4; --soft: #eceff3;
-  --gnome: #9a2d6c; --known: #3a6b8c; --supply: #a8701a; --good: #2f7d4f;
-  --f-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
-  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --f-data: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#152033; --ink2:#435066; --muted:#687386; --line:#D8DEE7; --line2:#E8ECF2;
+  --g:#6B3FB0; --k:#0B8A72; --c:#4A78C9; --o:#C27719;
+  --gSoft:#EFE9F8; --kSoft:#E2F3EF; --mid:#E5E9EF;
+  --act:#1F56C3; --actInk:#FFFFFF; --actSoft:#EAF0FC; --actLine:#B9CBEF;
+  --focus:#1F56C3; --hint:#1F56C3;
+  --serif:"Newsreader",Georgia,serif; --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #10151b; --surface: #161d25; --ink: #e5e9ee; --muted: #9ba6b2; --line: #2a343f; --soft: #1e2731;
-    --gnome: #e27bb5; --known: #7fb3d6; --supply: #e3ab4f; --good: #6cc492; color-scheme: dark;
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141B; --surface:#161D27; --ink:#E6EAF0; --ink2:#B4BDCA; --muted:#8A95A5; --line:#2A3443; --line2:#1F2732;
+    --g:#9D7BE0; --k:#2BB394; --c:#6E97E3; --o:#D08B34; --gSoft:#271F3A; --kSoft:#123029; --mid:#252D39;
+    --act:#7FA7F5; --actInk:#0F141B; --actSoft:#17233A; --actLine:#33507F; --focus:#7FA7F5; --hint:#9DBBF7;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #10151b; --surface: #161d25; --ink: #e5e9ee; --muted: #9ba6b2; --line: #2a343f; --soft: #1e2731;
-  --gnome: #e27bb5; --known: #7fb3d6; --supply: #e3ab4f; --good: #6cc492; color-scheme: dark;
+:root[data-theme="dark"]{
+  --bg:#0F141B; --surface:#161D27; --ink:#E6EAF0; --ink2:#B4BDCA; --muted:#8A95A5; --line:#2A3443; --line2:#1F2732;
+  --g:#9D7BE0; --k:#2BB394; --c:#6E97E3; --o:#D08B34; --gSoft:#271F3A; --kSoft:#123029; --mid:#252D39;
+  --act:#7FA7F5; --actInk:#0F141B; --actSoft:#17233A; --actLine:#33507F; --focus:#7FA7F5; --hint:#9DBBF7;
 }
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
-.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 64px; display: grid; gap: 56px; }
-h1, h2, h3 { font-family: var(--f-display); font-weight: 600; line-height: 1.2; text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(28px, 4.4vw, 42px); letter-spacing: -0.01em; }
-h2 { font-size: clamp(21px, 2.6vw, 26px); }
-h3 { font-size: 16px; font-family: var(--f-body); font-weight: 600; }
-p { margin: 0; max-width: 68ch; }
-.muted { color: var(--muted); }
-.eyebrow { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.num { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-section { display: grid; gap: 18px; min-width: 0; }
-.sechead { display: grid; gap: 8px; }
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; min-width: 0; }
-.g { color: var(--gnome); font-weight: 600; } .k { color: var(--known); font-weight: 600; }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--act);text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+@media (max-width:600px){.wrap{padding:0 16px}}
 
-/* header */
-header { display: grid; gap: 16px; }
-.lede { font-size: 17px; max-width: 64ch; }
-.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; padding-top: 6px; }
-.fact { display: grid; gap: 2px; min-width: 150px; }
-.fact b { font-family: var(--f-data); font-size: 22px; font-weight: 500; }
-.fact span { font-size: 13px; color: var(--muted); }
+/* top bar */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.brand{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);text-decoration:none;white-space:nowrap}
+.bar nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.bar nav::-webkit-scrollbar{display:none}
+.bar nav a{color:var(--ink2);text-decoration:none;font-size:14px;font-weight:500;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.bar nav a:hover{background:var(--line2);color:var(--ink)}
+.bar nav a.on{background:var(--actSoft);color:var(--act)}
+@media (max-width:760px){.brand{display:none}.bar nav{margin-left:0}}
 
-/* segmented controls */
-.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--soft); padding: 4px; border-radius: 8px; }
-.seg button { font: 500 13px var(--f-body); color: var(--muted); background: transparent; border: 0; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
-.seg button:focus-visible, .pt button:focus-visible { outline: 2px solid var(--gnome); outline-offset: 2px; }
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-.legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+/* hero */
+.hero{padding:56px 0 24px}
+.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;max-width:24ch;hyphens:manual}
+.lede{font-size:19px;line-height:1.55;color:var(--ink2);max-width:62ch;margin:0 0 22px}
+.meta{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14px;color:var(--muted);margin-bottom:8px}
+.meta a{font-weight:600}
+
+/* sections */
+section{padding:44px 0;border-top:1px solid var(--line)}
+section h2{font-family:var(--serif);font-weight:500;font-size:clamp(25px,3.2vw,33px);line-height:1.15;margin:0 0 10px;max-width:30ch}
+.intro{color:var(--ink2);max-width:66ch;margin:0 0 20px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:880px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.note{font-size:13.5px;color:var(--muted);margin:12px 0 0;max-width:72ch}
+.takeaway{border-left:3px solid var(--g);padding:2px 0 2px 14px;margin:18px 0 0;color:var(--ink);max-width:66ch}
+
+/* controls: everything clickable is blue and sits in this strip */
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin:0 0 16px;padding:12px 16px;background:var(--actSoft);border:1px solid var(--actLine);border-radius:12px}
+.controls .hint{flex:1 1 100%;margin:0}
+.ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctl-label{font-size:14px;font-weight:600;color:var(--ink)}
+.seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+.seg button{font:500 14px/1 var(--sans);color:var(--act);background:var(--surface);border:1px solid var(--actLine);border-radius:8px;padding:9px 14px;cursor:pointer;min-height:38px;transition:border-color .12s,background .12s}
+.seg button:hover{border-color:var(--act)}
+.seg button[aria-pressed="true"]{background:var(--act);border-color:var(--act);color:var(--actInk);font-weight:600}
+.seg button[aria-pressed="true"]::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:8px;vertical-align:1px}
+.hint{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--hint);font-weight:600;margin:0 0 12px}
+.hint svg{flex:none}
+
+/* how-to guide */
+.guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:30px 0 8px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.guide h2{grid-column:1/-1;font-family:var(--sans);font-size:15px;font-weight:700;margin:0;color:var(--ink)}
+.guide .g{display:flex;gap:12px;align-items:center;font-size:14.5px;color:var(--ink2);line-height:1.45}
+.guide .demo{flex:none;display:flex;align-items:center;justify-content:center;width:92px;height:52px;border-radius:10px;background:var(--actSoft);border:1px solid var(--actLine)}
+.guide .demo .b{font:600 11.5px/1 var(--sans);padding:6px 8px;border-radius:6px;border:1px solid var(--actLine);background:var(--surface);color:var(--act)}
+.guide .demo .b.on{background:var(--act);border-color:var(--act);color:var(--actInk)}
+.guide .demo .b+.b{margin-left:4px}
+.guide .tile{width:38px;height:40px;border-radius:6px;background:var(--g);color:#fff;font:700 13px/1 var(--sans);display:flex;flex-direction:column;justify-content:space-between;padding:5px;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--act)}
+.guide .tile small{font-weight:500;font-size:9.5px}
+@media (max-width:820px){.guide{grid-template-columns:minmax(0,1fr)}}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--ink2);margin:0 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
 
 /* charts */
-svg { display: block; width: 100%; height: auto; overflow: visible; }
-svg text { fill: var(--ink); font-family: var(--f-body); font-size: 12px; }
-svg .t-muted { fill: var(--muted); }
-svg .t-data { font-family: var(--f-data); font-size: 11.5px; }
-.chartnote { font-size: 13px; color: var(--muted); }
-.tscroll svg { min-width: 640px; }
-.panel > *, section > *, .two > * { min-width: 0; }
+svg text{font-family:var(--sans)}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.mark{cursor:pointer;transition:opacity .12s}
+.mark:hover,.mark:focus{stroke:var(--ink);stroke-width:1.5;opacity:.92}
+.axis{stroke:var(--line)}
+.gridline{stroke:var(--line2)}
+.lbl{fill:var(--ink);font-size:13px}
+.lbl2{fill:var(--muted);font-size:12px}
+.val{fill:var(--ink2);font-size:12px;font-variant-numeric:tabular-nums}
+
+/* tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.45;padding:8px 11px;border-radius:8px;max-width:280px;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;font-variant-numeric:tabular-nums}
+#tip.on{opacity:1;transform:none}
+#tip b{font-weight:600}
 
 /* periodic table */
-.ptwrap { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
-.ptscroll { overflow-x: auto; padding-bottom: 4px; }
-.pt { display: grid; grid-template-columns: repeat(18, minmax(30px, 1fr)); gap: 3px; min-width: 600px; }
-.pt button { aspect-ratio: 1 / 1.08; border: 1px solid transparent; border-radius: 4px; padding: 2px; display: grid; place-items: center; align-content: center;
-  font: 600 13px var(--f-body); cursor: pointer; background: var(--soft); color: var(--ink); line-height: 1; }
-.pt button small { font: 400 9px var(--f-data); opacity: .75; }
-.pt button[data-nodata] { color: var(--muted); font-weight: 400; cursor: default; }
-.pt button[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.pt .gap { grid-column: 1 / -1; height: 8px; }
-.pt .fnote { font: 400 10px var(--f-data); color: var(--muted); display: grid; place-items: center; }
-.scale { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-.scale .bar { height: 10px; border-radius: 3px; }
-.scale .ends { display: flex; justify-content: space-between; }
-.detail { display: grid; gap: 12px; }
-.detail .sym { font-family: var(--f-display); font-size: 40px; line-height: 1; }
-.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13.5px; }
-.detail dt { color: var(--muted); }
-.detail dd { margin: 0; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
-.chip.on { border-color: var(--gnome); color: var(--gnome); }
-
-/* two-up grid */
-.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.two > .panel { display: grid; gap: 12px; align-content: start; }
+.pt{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:3px}
+.pt .gap{grid-column:1/-1;height:8px}
+.el{position:relative;aspect-ratio:1/1.08;border:1px solid transparent;border-radius:5px;padding:3px 4px;background:var(--mid);color:var(--ink);font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.el .s{font-weight:700;font-size:clamp(9px,1.25vw,15px);line-height:1}
+.el .r{font-size:clamp(7px,.85vw,11px);line-height:1;font-variant-numeric:tabular-nums;opacity:.9}
+.el:hover{border-color:var(--act);transform:translateY(-1px)}
+.el[aria-pressed="true"]{border-color:var(--surface);box-shadow:0 0 0 2px var(--act)}
+.el.invite{animation:invite 1.4s ease-out .6s 2}
+@keyframes invite{0%{box-shadow:0 0 0 2px var(--act)}60%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 2px var(--act)}}
+.detail .sel{font-size:13.5px;color:var(--muted);margin:0 0 6px}
+.el.na{cursor:default;background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.el.na:hover{transform:none;border-color:var(--line)}
+.el.rad::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6}
+.ramp{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted);margin-top:12px;flex-wrap:wrap}
+.ramp .bar2{height:10px;width:220px;border-radius:5px}
+.detail h3{font-family:var(--serif);font-weight:500;font-size:28px;margin:0;line-height:1.1}
+.detail .big{font-family:var(--serif);font-size:44px;line-height:1;margin:14px 0 4px;font-variant-numeric:tabular-nums}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0 0;font-size:14px}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;font-variant-numeric:tabular-nums}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--line2);color:var(--ink2)}
+.ptwrap{overflow-x:auto;margin:0 -4px;padding:0 4px 4px}
+@media (max-width:600px){.pt{min-width:600px}.ptwrap::after{content:'Swipe sideways to see the whole table';display:block;font-size:12.5px;color:var(--muted);margin-top:6px}}
 
 /* tables */
-.tscroll { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 520px; }
-th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-th { font-weight: 500; color: var(--muted); font-size: 12px; }
-th:first-child, td:first-child { text-align: left; }
-td.num { font-family: var(--f-data); }
-.pill { font: 500 11px var(--f-body); padding: 2px 7px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
-.pill.warn { color: var(--supply); background: color-mix(in srgb, var(--supply) 14%, transparent); }
-.pill.ok { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th{text-align:left;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--line);padding:8px 10px 8px 0;vertical-align:bottom}
+.tbl td{border-bottom:1px solid var(--line2);padding:8px 10px 8px 0;vertical-align:top}
+.tbl td.n,.tbl th.n{text-align:right}
+.tbl td.n{white-space:nowrap}
+.scroll{overflow-x:auto}
+.pill{display:inline-block;min-width:44px;text-align:right}
+.meter{display:inline-block;width:64px;height:6px;border-radius:3px;background:var(--line2);vertical-align:middle;margin-left:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--g)}
 
-ol.limits { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 72ch; }
-footer { display: grid; gap: 10px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px; }
-footer a { color: var(--known); }
-
-@media (max-width: 820px) {
-  .ptwrap, .two { grid-template-columns: minmax(0, 1fr); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .pt button { transition: background-color .25s ease; }
-}
+/* checks */
+.checks li{margin:0 0 10px;max-width:72ch}
+.limits{columns:2;column-gap:36px;padding-left:18px}
+.limits li{margin:0 0 10px;break-inside:avoid}
+@media (max-width:760px){.limits{columns:1}}
+footer{padding:40px 0 64px;border-top:1px solid var(--line);color:var(--ink2);font-size:14.5px}
+footer h2{font-family:var(--serif);font-weight:500;font-size:24px;margin:0 0 10px;color:var(--ink)}
+footer ol{padding-left:20px;max-width:70ch}
+code,pre{font-size:13px}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;white-space:pre-wrap}
+.theme{margin-left:8px;border:1px solid var(--actLine);background:var(--surface);color:var(--act);border-radius:999px;padding:6px 10px;font:500 13px var(--sans);cursor:pointer;white-space:nowrap}
 </style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <a class="brand" href="#top">GNoME critical elements audit</a>
+  <nav aria-label="Sections">
+    <a href="#result">Main result</a><a href="#elements">Elements</a><a href="#why">Why</a><a href="#stability">Stability</a><a href="#apps">Applications</a><a href="#countries">Countries</a><a href="#checks">Checks</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a>
+  </nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch colour theme">Dark mode</button>
+</div></div>
 
-<div class="wrap">
-  <header>
-    <div class="eyebrow">Supply-risk audit · GNoME · Materials Project · USGS 2025</div>
-    <h1>Does AI materials discovery lean on critical raw materials?</h1>
-    <p class="lede">Google DeepMind's GNoME proposed about 554,000 new stable materials. This page compares the elements they are made of with materials that are already known, using public data only.</p>
-    <div class="facts">
-      <div class="fact"><b class="num g">72% vs 45%</b><span>contain a rare earth (GNoME vs known)</span></div>
-      <div class="fact"><b class="num g">41% vs 19%</b><span>contain a platinum-group metal</span></div>
-      <div class="fact"><b class="num">1.24× vs 0.59×</b><span>rare-earth use compared with random choice</span></div>
-      <div class="fact"><b class="num">93–100%</b><span>of high-risk shortlist candidates have a lower-risk alternative</span></div>
-    </div>
-  </header>
+<main id="top">
+<div class="hero"><div class="wrap">
+  <h1>Rare-earth and platinum-group metals are over-represented in AI-predicted crystals</h1>
+  <p class="lede">Google DeepMind's GNoME project predicted 554,054 stable inorganic crystals. This audit asks which elements those crystals need. Compared fairly with known materials, they contain rare-earth and platinum-group metals far more often, and these are elements whose supply depends on very few countries.</p>
+  <div class="meta">
+    <span>Mohammad Haris Mushtaq, independent researcher</span>
+    <a href="https://github.com/Harismushtaq12/gnome-critical-materials-audit">Code and data on GitHub</a>
+    <a href="https://github.com/Harismushtaq12/gnome-critical-materials-audit/tree/main/results">All result tables (CSV)</a>
+    <span>Results of the analysis run of 3 October 2026, with checks added on 10 October 2026</span>
+  </div>
+  <div class="guide" aria-label="How to use this page">
+    <h2>How to use this page</h2>
+    <div class="g"><span class="demo" aria-hidden="true"><span class="b on">On</span><span class="b">Off</span></span><span>Blue buttons change what a chart shows. Anything blue on this page can be clicked.</span></div>
+    <div class="g"><span class="demo" aria-hidden="true"><svg width="62" height="26" viewBox="0 0 62 26"><rect x="0" y="3" width="44" height="8" rx="3" fill="var(--g)"/><rect x="0" y="15" width="28" height="8" rx="3" fill="var(--k)" stroke="var(--ink)" stroke-width="1.5"/><path d="M33 13l0 11 3-3 2.5 5 2-1-2.5-5 4 0z" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.1" stroke-linejoin="round"/></svg></span><span>Hover over or tap any bar or dot to see its exact numbers.</span></div>
+    <div class="g"><span class="demo" aria-hidden="true"><span class="tile">Tm<small>18&times;</small></span></span><span>Click any element in the periodic table to see how often GNoME uses it.</span></div>
+  </div>
+</div></div>
 
-  <section id="compare">
-    <div class="sechead">
-      <div class="eyebrow">1 · Main comparison</div>
-      <h2>GNoME uses more critical elements than known materials</h2>
-      <p class="muted">Each reference group is re-weighted so it has the same mix of compound types as GNoME (number of elements and chemistry type). Only types with at least 100 reference compounds are compared.</p>
-    </div>
-    <div class="panel" style="display:grid;gap:14px">
-      <div class="controls">
-        <div class="seg" id="refSeg" role="group" aria-label="Reference group"></div>
-        <div class="legend"><span><i style="background:var(--gnome)"></i>GNoME</span><span><i style="background:var(--known)"></i><span id="refName">Known materials</span></span></div>
-      </div>
-      <div id="mainChart"></div>
-      <p class="chartnote" id="mainNote"></p>
-    </div>
-  </section>
+<section id="result"><div class="wrap">
+  <h2>GNoME materials contain more critical elements than known materials</h2>
+  <p class="intro">Each group is compared within the same compound types (same number of elements, metal-only or with an anion), so differences in the kind of compound do not count as a difference in elements.</p>
+  <div class="controls">
+    <p class="hint">__HINT__Choose a reference group to change the chart. Hover or tap a bar for the exact numbers.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-ref">Compare GNoME with</span>
+      <div class="seg" role="group" aria-labelledby="lab-ref" data-ctl="ref">
+        <button type="button" data-v="MP_known" aria-pressed="true">Known materials</button>
+        <button type="button" data-v="MP_theoretical" aria-pressed="false">Computed MP entries</button>
+        <button type="button" data-v="EXT_CODED" aria-pressed="false">Other databases</button>
+      </div></div>
+  </div>
+  <div class="panel">
+    <div class="legend" id="leg-main"></div>
+    <div id="ch-main"></div>
+    <p class="note" id="note-main"></p>
+  </div>
+  <p class="takeaway" id="take-main"></p>
+</div></section>
 
-  <section id="elements">
-    <div class="sechead">
-      <div class="eyebrow">2 · Element by element</div>
-      <h2>Which elements GNoME over-uses, and where they come from</h2>
-      <p class="muted">Select an element to see its numbers. Colours show how much more (or less) often GNoME uses it than matched known materials, or how concentrated its world production is.</p>
+<section id="elements"><div class="wrap">
+  <h2>Heavy lanthanides and platinum-group metals are the most over-used elements</h2>
+  <p class="intro">The colour shows how much more often GNoME materials contain each element than known materials do. Violet means over-used, teal means under-used. The size of each ratio depends on how the known materials are matched, so both versions are shown.</p>
+  <div class="controls">
+    <p class="hint">__HINT__Click any element to see its numbers. Switch the matching to compare the two methods.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-pt">Known materials matched by</span>
+      <div class="seg" role="group" aria-labelledby="lab-pt" data-ctl="pt">
+        <button type="button" data-v="n" aria-pressed="true">Number of elements</button>
+        <button type="button" data-v="t" aria-pressed="false">Compound type</button>
+      </div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="ptwrap"><div class="pt" id="pt" role="group" aria-label="Periodic table of element ratios"></div></div>
+      <div class="ramp"><span>Used less</span><span class="bar2" id="ramp"></span><span>Used more</span><span id="ramp-ticks"></span></div>
+      <p class="note">Dashed cells: not enough compounds to compare. A small dot marks radioactive elements, whose very large ratios rest on few known compounds.</p>
     </div>
-    <div class="panel" style="display:grid;gap:16px">
-      <div class="controls">
-        <div class="seg" id="modeSeg" role="group" aria-label="Colour by"></div>
-        <div class="scale" style="min-width:220px"><div class="bar" id="scaleBar"></div><div class="ends" id="scaleEnds"></div></div>
-      </div>
-      <div class="ptwrap">
-        <div style="display:grid;gap:6px;min-width:0"><div class="ptscroll"><div class="pt" id="pt"></div></div><p class="chartnote">Grey cells: no data. On a phone, swipe the table sideways.</p></div>
-        <div class="detail" id="detail" aria-live="polite"></div>
-      </div>
-    </div>
-  </section>
+    <div class="panel detail" id="detail" aria-live="polite"></div>
+  </div>
+</div></section>
 
-  <section id="why">
-    <div class="sechead">
-      <div class="eyebrow">3 · Why it happens</div>
-      <h2>Mostly a choice of elements, not only a choice of compound type</h2>
-      <p class="muted">GNoME explores many large metal-only compounds. That explains part of the gap. The rest comes from which elements it picks within the same type of compound.</p>
+<section id="why"><div class="wrap">
+  <h2>Much of the gap comes from the elements chosen, not only the kind of compound</h2>
+  <p class="intro">The gap can arise in two ways: GNoME may have more of the compound types that often contain these elements (type mix), or it may choose these elements more often inside the same type (within type). The split depends on whose type weights are used.</p>
+  <div class="controls">
+    <p class="hint">__HINT__Switch the weights to see how the split changes.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-dec">Weights</span>
+      <div class="seg" role="group" aria-labelledby="lab-dec" data-ctl="dec">
+        <button type="button" data-v="a" aria-pressed="true">GNoME types (paper)</button>
+        <button type="button" data-v="b" aria-pressed="false">Known types</button>
+        <button type="button" data-v="avg" aria-pressed="false">Average of both</button>
+      </div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="legend"><span><i class="sw" style="background:var(--k)"></i>Type mix</span><span><i class="sw" style="background:var(--g)"></i>Within type</span></div>
+      <div id="ch-dec"></div>
+      <p class="note">Share of the gap on the common support. Averaged over both weight orders, more than half of each family's gap arises within the same compound type; for platinum-group metals the answer depends on the order.</p>
     </div>
-    <div class="two">
-      <div class="panel">
-        <h3>How much of the gap comes from compound type</h3>
-        <div id="decChart"></div>
-        <p class="chartnote">Light part: explained by GNoME's mix of compound types. Dark part: remaining gap within the same type. Common support, compared with known materials.</p>
-      </div>
-      <div class="panel">
-        <h3>Use compared with random element choice</h3>
-        <div class="seg" id="famSeg" role="group" aria-label="Element family"></div>
-        <div id="uniChart"></div>
-        <p class="chartnote">1.0 means the family appears as often as if elements were picked at random. Known materials use these families less than random; GNoME uses them more.</p>
-      </div>
-      <div class="panel">
-        <h3>Closer to the stability limit</h3>
-        <div class="seg" id="margSeg" role="group" aria-label="Margin reference"></div>
-        <div id="margChart"></div>
-        <p class="chartnote" id="margNote"></p>
-      </div>
-      <div class="panel">
-        <h3>The largest compounds: a shared habit</h3>
-        <div id="bigChart"></div>
-        <p class="chartnote">Share containing a rare earth, metal-only compounds. With 5 or more elements, GNoME looks like other computed databases. Known materials have only 2 such compounds, so they are not shown.</p>
-      </div>
+    <div class="panel">
+      <h3 style="font-family:var(--serif);font-weight:500;font-size:20px;margin:0 0 4px">Compared with random element choice</h3>
+      <p class="note" style="margin:0 0 10px">1.0 means a group uses the family as often as a random choice of elements would. Known materials sit well below 1, GNoME above it.</p>
+      <div class="legend" id="leg-uni"></div>
+      <div id="ch-uni"></div>
     </div>
-  </section>
+  </div>
+  <p class="takeaway">The gap has two sides. Known materials reflect what chemists have chosen to make, which may be shaped by cost and availability. GNoME also lies above the random baseline and above other computed databases for rare earths, so the dataset itself adds to the gap.</p>
+</div></section>
 
-  <section id="apps">
-    <div class="sechead">
-      <div class="eyebrow">4 · Does it matter in practice</div>
-      <h2>Application shortlists carry the same risk, but alternatives exist</h2>
-      <p class="muted">Energy-GNoME screened GNoME for battery cathodes, solar perovskites and thermoelectrics. Performance values are machine-learning predictions.</p>
-    </div>
-    <div class="panel" style="display:grid;gap:16px">
-      <div class="seg" id="appSeg" role="group" aria-label="Application"></div>
-      <div class="two" style="gap:24px">
-        <div style="display:grid;gap:10px;min-width:0">
-          <h3>Share of atoms on the EU critical list</h3>
-          <div id="appChart"></div>
-        </div>
-        <div style="display:grid;gap:10px;min-width:0">
-          <h3>Lower-risk alternatives</h3>
-          <p class="chartnote">High risk: half or more of the atoms on the EU list. An alternative has predicted performance within 10% and a critical share at least 0.2 lower.</p>
-        </div>
-      </div>
-      <div class="tscroll"><table id="altTable"></table></div>
-    </div>
-  </section>
+<section id="stability"><div class="wrap">
+  <h2>Rare-earth materials lie closer to the stability limit</h2>
+  <p class="intro">A material is near-hull when its predicted energy is less than 25 meV/atom below the convex hull of competing phases. Materials with lanthanides whose 4f electrons are frozen in the calculation are near-hull more often.</p>
+  <div class="controls">
+    <p class="hint">__HINT__Switch the reference hull. Hover a bar for the numbers.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-hull">Hull</span>
+      <div class="seg" role="group" aria-labelledby="lab-hull" data-ctl="hull">
+        <button type="button" data-v="mp" aria-pressed="true">Materials Project</button>
+        <button type="button" data-v="oq" aria-pressed="false">Materials Project + OQMD</button>
+      </div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="legend"><span><i class="sw" style="background:var(--g)"></i>With the element family</span><span><i class="sw" style="background:var(--mutedsw,#9AA1AA)"></i>Without</span></div><div id="ch-stab"></div></div>
+    <div class="panel"><div id="tab-or"></div><p class="note">Odds of being near-hull with the family, matched by compound type. The first interval treats every compound as independent. The second interval resamples near-copies (compounds that differ only by swapping one rare earth for another) together, so it is wider and more honest.</p></div>
+  </div>
+</div></section>
 
-  <section id="countries">
-    <div class="sechead">
-      <div class="eyebrow">5 · Countries</div>
-      <h2>More dependence on a few producing countries</h2>
-      <p class="muted" id="ccNote"></p>
-    </div>
-    <div class="panel"><div id="ctyChart"></div>
-      <p class="chartnote">Share of the supply of each group's elements, by producing country (USGS 2025). Known materials re-weighted to GNoME's mix of compound types.</p></div>
-  </section>
+<section id="apps"><div class="wrap">
+  <h2>The excess reaches application shortlists, at a smaller size</h2>
+  <p class="intro">Energy-GNoME shortlisted GNoME candidates for battery cathodes, solar perovskites and thermoelectrics. Their critical-element shares are compared with known materials, and each high-risk candidate (EU atom share of 0.5 or more) is checked for a lower-risk alternative with similar predicted performance.</p>
+  <div class="controls">
+    <p class="hint">__HINT__Pick a shortlist and a matching method. The table below responds to the rule you choose.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-app">Shortlist</span>
+      <div class="seg" role="group" aria-labelledby="lab-app" data-ctl="app">
+        <button type="button" data-v="cathode" aria-pressed="true">Battery cathodes</button>
+        <button type="button" data-v="perovskite" aria-pressed="false">Solar perovskites</button>
+        <button type="button" data-v="thermoelectric" aria-pressed="false">Thermoelectrics</button>
+      </div></div>
+    <div class="ctl"><span class="ctl-label" id="lab-egm">Matched by</span>
+      <div class="seg" role="group" aria-labelledby="lab-egm" data-ctl="egm">
+        <button type="button" data-v="n" aria-pressed="true">Number of elements</button>
+        <button type="button" data-v="t" aria-pressed="false">Compound type</button>
+      </div></div>
+  </div>
+  <div class="panel"><div class="legend"><span><i class="sw" style="background:var(--g)"></i>Shortlist</span><span><i class="sw" style="background:var(--k)"></i>Known materials (matched)</span></div><div id="ch-eg"></div><p class="note" id="note-eg"></p></div>
+  <div class="controls" style="margin-top:22px">
+    <p class="hint">__HINT__Choose a rule for the table below. Stricter rules leave fewer alternatives.</p>
+    <div class="ctl"><span class="ctl-label" id="lab-rule">Alternative rule</span>
+      <div class="seg" role="group" aria-labelledby="lab-rule" data-ctl="rule">
+        <button type="button" data-v="base" aria-pressed="true">Paper rule</button>
+        <button type="button" data-v="same" aria-pressed="false">Same compound type</button>
+        <button type="button" data-v="conf" aria-pressed="false">Confidence ≥ 0.9</button>
+        <button type="button" data-v="both" aria-pressed="false">Both</button>
+      </div></div>
+  </div>
+  <div class="panel scroll"><div id="tab-alt"></div><p class="note">An alternative has predicted performance within 10% (0.1 eV for perovskites) and an EU atom share at least 0.2 lower. Performance values are machine-learning predictions, so alternatives are leads for study, not recommendations.</p></div>
+</div></section>
 
-  <section id="limits">
-    <div class="sechead">
-      <div class="eyebrow">6 · Limits</div>
-      <h2>What this study cannot show</h2>
-    </div>
-    <ol class="limits">
-      <li>It looks at which elements materials contain, not whether they can be made. Checking that needs calculations that treat 4f electrons explicitly, or experiments.</li>
-      <li>The fair comparison covers 72.6% of GNoME. Very large metal-only compounds have almost no known counterparts.</li>
-      <li>DeepMind's r²SCAN re-check covers 117,043 materials that are not a random sample (fewer rare earths than the rest).</li>
-      <li>USGS reports rare earths as one group, and Ru, Rh, Os and Ir together with platinum; germanium has no world figure.</li>
-      <li>Hypotheses H1–H3 were fixed before the real data. Everything else is exploratory. The alternatives analysis was redesigned once after its first run.</li>
-      <li>On fake data with no effect, the tests gave false alarms <span class="num" id="nullTxt"></span> of the time, close to the expected 5%.</li>
-    </ol>
-  </section>
+<section id="countries"><div class="wrap">
+  <h2>Supply depends more on a few countries</h2>
+  <p class="intro">Each element is linked to its world mine production (USGS 2025). The bars show what share of the atoms in each group come from each producing country, with known materials matched to GNoME's compound types.</p>
+  <div class="controls"><p class="hint">__HINT__Hover or tap a bar for the exact shares.</p></div>
+  <div class="grid2">
+    <div class="panel"><div class="legend"><span><i class="sw" style="background:var(--g)"></i>GNoME</span><span><i class="sw" style="background:var(--k)"></i>Known materials (matched)</span></div><div id="ch-cty"></div></div>
+    <div class="panel"><div id="tab-cc"></div><p class="note">Rare earths, four platinum-group metals and hafnium share one production pattern per group in the USGS data, so these figures are approximate. They describe mining, not refining.</p></div>
+  </div>
+</div></section>
 
-  <footer>
-    <div>Mohammad Haris Mushtaq · Results from the paper run of 3 October 2026.</div>
-    <div>Data: GNoME (Merchant et al., Nature 2023; CC BY-NC 4.0) · Materials Project (CC BY 4.0) · Energy-GNoME (De Angelis et al., Energy and AI 2025) · USGS Mineral Commodity Summaries 2025 · EU 2023 and US 2022 critical raw material lists · HHI 2011 (Gaultois et al., Chem. Mater. 2013).</div>
-  </footer>
-</div>
+<section id="checks"><div class="wrap">
+  <h2>The main result holds under the checks a reviewer would ask for</h2>
+  <p class="intro">These checks were added after an internal review. Each one changes one choice in the analysis and asks whether the rare-earth gap survives.</p>
+  <div class="panel scroll"><div id="tab-checks"></div></div>
+  <p class="note">Full tables are in the electronic supplementary information of the paper and in the files <code>R1</code> to <code>R8</code> of the results folder.</p>
+</div></section>
 
-<script id="data" type="application/json">{"els":{"H":{"z":1,"name":"Hydrogen","row":1,"col":1,"lg":-4.675,"lo":-4.718,"hi":-4.631,"ng":6725,"nk":6347,"sg":0.0121,"sk":0.3101,"f":[]},"He":{"z":2,"name":"Helium","row":1,"col":18,"f":[]},"Li":{"z":3,"name":"Lithium","row":2,"col":1,"lg":-0.647,"lo":-0.723,"hi":-0.557,"ng":21593,"nk":2081,"sg":0.039,"sk":0.061,"src":"Lithium","top":"Australia","ts":0.367,"cn":0.171,"hhi":2215,"px":false,"f":["eu","us"]},"Be":{"z":4,"name":"Beryllium","row":2,"col":2,"lg":0.193,"lo":0.001,"hi":0.378,"ng":7555,"nk":423,"sg":0.0136,"sk":0.0119,"src":"Beryllium","top":"United States","ts":0.495,"cn":0.212,"hhi":3420,"px":false,"f":["eu","us"]},"B":{"z":5,"name":"Boron","row":2,"col":13,"lg":-0.09,"lo":-0.161,"hi":-0.02,"ng":39305,"nk":3194,"sg":0.0709,"sk":0.0755,"src":"Boron","top":"Turkey","ts":0.656,"cn":0.074,"hhi":4534,"px":false,"f":["eu"]},"C":{"z":6,"name":"Carbon","row":2,"col":14,"lg":-2.523,"lo":-2.567,"hi":-2.469,"ng":16647,"nk":4641,"sg":0.0301,"sk":0.1726,"src":"Graphite","top":"China","ts":0.779,"cn":0.779,"hhi":6143,"px":false,"f":["us"]},"N":{"z":7,"name":"Nitrogen","row":2,"col":15,"lg":-3.296,"lo":-3.344,"hi":-3.241,"ng":10991,"nk":5125,"sg":0.0198,"sk":0.1949,"src":"Nitrogen","top":"China","ts":0.306,"cn":0.306,"hhi":1278,"px":false,"f":[]},"O":{"z":8,"name":"Oxygen","row":2,"col":16,"lg":-3.15,"lo":-3.166,"hi":-3.132,"ng":44611,"nk":20671,"sg":0.0805,"sk":0.7148,"f":[]},"F":{"z":9,"name":"Fluorine","row":2,"col":17,"lg":-2.575,"lo":-2.637,"hi":-2.5,"ng":10639,"nk":3521,"sg":0.0192,"sk":0.1144,"src":"Fluorspar","top":"China","ts":0.621,"cn":0.621,"hhi":4200,"px":false,"f":["us"]},"Ne":{"z":10,"name":"Neon","row":2,"col":18,"f":[]},"Na":{"z":11,"name":"Sodium","row":3,"col":1,"lg":-2.713,"lo":-2.775,"hi":-2.65,"ng":9511,"nk":3046,"sg":0.0172,"sk":0.1125,"src":"Salt","top":"China","ts":0.196,"cn":0.196,"hhi":831,"px":false,"f":[]},"Mg":{"z":12,"name":"Magnesium","row":3,"col":2,"lg":0.0,"lo":-0.152,"hi":0.098,"ng":19775,"nk":1476,"sg":0.0357,"sk":0.0357,"src":"Magnesium Metal","top":"China","ts":0.909,"cn":0.909,"hhi":8280,"px":false,"f":["eu","us"]},"Al":{"z":13,"name":"Aluminum","row":3,"col":13,"lg":0.914,"lo":0.82,"hi":0.986,"ng":50161,"nk":2479,"sg":0.0905,"sk":0.0481,"src":"Bauxite","top":"Guinea","ts":0.289,"cn":0.206,"hhi":1895,"px":false,"f":["us"]},"Si":{"z":14,"name":"Silicon","row":3,"col":14,"lg":0.799,"lo":0.734,"hi":0.867,"ng":79738,"nk":3776,"sg":0.1439,"sk":0.0827,"src":"Silicon","top":"China","ts":0.686,"cn":0.686,"hhi":4843,"px":false,"f":[]},"P":{"z":15,"name":"Phosphorus","row":3,"col":15,"lg":-1.126,"lo":-1.171,"hi":-1.072,"ng":43262,"nk":5075,"sg":0.0781,"sk":0.1704,"src":"Phosphate","top":"China","ts":0.458,"cn":0.458,"hhi":2425,"px":false,"f":["eu"]},"S":{"z":16,"name":"Sulfur","row":3,"col":16,"lg":-3.115,"lo":-3.168,"hi":-3.063,"ng":10312,"nk":5736,"sg":0.0186,"sk":0.1613,"src":"Sulfur","top":"China","ts":0.223,"cn":0.223,"hhi":937,"px":false,"f":[]},"Cl":{"z":17,"name":"Chlorine","row":3,"col":17,"lg":-3.026,"lo":-3.091,"hi":-2.954,"ng":7423,"nk":3431,"sg":0.0134,"sk":0.1091,"src":"Salt","top":"China","ts":0.196,"cn":0.196,"hhi":831,"px":false,"f":[]},"Ar":{"z":18,"name":"Argon","row":3,"col":18,"f":[]},"K":{"z":19,"name":"Potassium","row":4,"col":1,"lg":-2.917,"lo":-2.986,"hi":-2.854,"ng":9403,"nk":3499,"sg":0.017,"sk":0.1282,"src":"Potash","top":"Canada","ts":0.31,"cn":0.13,"hhi":1778,"px":false,"f":[]},"Ca":{"z":20,"name":"Calcium","row":4,"col":2,"lg":-0.761,"lo":-0.862,"hi":-0.68,"ng":16965,"nk":1931,"sg":0.0306,"sk":0.0519,"f":[]},"Sc":{"z":21,"name":"Scandium","row":4,"col":3,"lg":2.449,"lo":2.284,"hi":2.621,"ng":35772,"nk":756,"sg":0.0646,"sk":0.0118,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"]},"Ti":{"z":22,"name":"Titanium","row":4,"col":4,"lg":0.761,"lo":0.645,"hi":0.886,"ng":20968,"nk":1202,"sg":0.0379,"sk":0.0223,"src":"Titanium Mineral","top":"China","ts":0.351,"cn":0.351,"hhi":1961,"px":false,"f":["eu","us"]},"V":{"z":23,"name":"Vanadium","row":4,"col":5,"lg":-1.195,"lo":-1.285,"hi":-1.098,"ng":11763,"nk":1667,"sg":0.0212,"sk":0.0486,"src":"Vanadium","top":"China","ts":0.68,"cn":0.68,"hhi":5080,"px":false,"f":["eu","us"]},"Cr":{"z":24,"name":"Chromium","row":4,"col":6,"lg":-0.765,"lo":-0.914,"hi":-0.609,"ng":8614,"nk":1189,"sg":0.0155,"sk":0.0264,"src":"Chromium","top":"South Africa","ts":0.447,"cn":0.0,"hhi":2584,"px":false,"f":["us"]},"Mn":{"z":25,"name":"Manganese","row":4,"col":7,"lg":-0.704,"lo":-0.789,"hi":-0.625,"ng":17929,"nk":2139,"sg":0.0324,"sk":0.0527,"src":"Manganese","top":"South Africa","ts":0.37,"cn":0.038,"hhi":2158,"px":false,"f":["eu","us"]},"Fe":{"z":26,"name":"Iron","row":4,"col":8,"lg":-0.439,"lo":-0.527,"hi":-0.362,"ng":25109,"nk":2559,"sg":0.0453,"sk":0.0614,"src":"Iron Ore","top":"Australia","ts":0.372,"cn":0.108,"hhi":1980,"px":false,"f":[]},"Co":{"z":27,"name":"Cobalt","row":4,"col":9,"lg":1.215,"lo":1.13,"hi":1.301,"ng":61348,"nk":2408,"sg":0.1107,"sk":0.0477,"src":"Cobalt","top":"Congo (Kinshasa)","ts":0.759,"cn":0.0,"hhi":5867,"px":false,"f":["eu","us"]},"Ni":{"z":28,"name":"Nickel","row":4,"col":10,"lg":1.041,"lo":0.95,"hi":1.162,"ng":39991,"nk":2593,"sg":0.0722,"sk":0.0351,"src":"Nickel","top":"Indonesia","ts":0.595,"cn":0.032,"hhi":3706,"px":false,"f":["eu","us"]},"Cu":{"z":29,"name":"Copper","row":4,"col":11,"lg":-1.374,"lo":-1.435,"hi":-1.305,"ng":19474,"nk":3053,"sg":0.0352,"sk":0.0911,"src":"Copper","top":"Chile","ts":0.23,"cn":0.078,"hhi":1035,"px":false,"f":["eu"]},"Zn":{"z":30,"name":"Zinc","row":4,"col":12,"lg":0.081,"lo":-0.016,"hi":0.189,"ng":27167,"nk":1778,"sg":0.049,"sk":0.0464,"src":"Zinc","top":"China","ts":0.333,"cn":0.333,"hhi":1476,"px":false,"f":["us"]},"Ga":{"z":31,"name":"Gallium","row":4,"col":13,"lg":1.647,"lo":1.534,"hi":1.769,"ng":43080,"nk":1768,"sg":0.0777,"sk":0.0248,"src":"Gallium","top":"China","ts":0.984,"cn":0.984,"hhi":9688,"px":false,"f":["eu","us"]},"Ge":{"z":32,"name":"Germanium","row":4,"col":14,"lg":-0.009,"lo":-0.097,"hi":0.083,"ng":18794,"nk":2651,"sg":0.0339,"sk":0.0341,"f":["eu","us"]},"As":{"z":33,"name":"Arsenic","row":4,"col":15,"lg":-0.422,"lo":-0.504,"hi":-0.336,"ng":19752,"nk":2026,"sg":0.0357,"sk":0.0478,"src":"Arsenic","top":"Peru","ts":0.464,"cn":0.412,"hhi":3957,"px":false,"f":["eu","us"]},"Se":{"z":34,"name":"Selenium","row":4,"col":16,"lg":-1.494,"lo":-1.576,"hi":-1.425,"ng":13696,"nk":2912,"sg":0.0247,"sk":0.0696,"src":"Selenium","top":"China","ts":0.486,"cn":0.486,"hhi":2894,"px":false,"f":[]},"Br":{"z":35,"name":"Bromine","row":4,"col":17,"lg":-0.379,"lo":-0.489,"hi":-0.262,"ng":14182,"nk":1424,"sg":0.0256,"sk":0.0333,"src":"Bromine","top":"Israel","ts":0.35,"cn":0.25,"hhi":2782,"px":false,"f":[]},"Kr":{"z":36,"name":"Krypton","row":4,"col":18,"f":[]},"Rb":{"z":37,"name":"Rubidium","row":5,"col":1,"lg":-1.425,"lo":-1.532,"hi":-1.331,"ng":10981,"nk":1769,"sg":0.0198,"sk":0.0532,"f":["us"]},"Sr":{"z":38,"name":"Strontium","row":5,"col":2,"lg":-1.042,"lo":-1.137,"hi":-0.955,"ng":13044,"nk":1825,"sg":0.0235,"sk":0.0485,"src":"Strontium","top":"Iran","ts":0.392,"cn":0.157,"hhi":3346,"px":false,"f":["eu"]},"Y":{"z":39,"name":"Yttrium","row":5,"col":3,"lg":2.727,"lo":2.593,"hi":2.859,"ng":79319,"nk":1205,"sg":0.1432,"sk":0.0216,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":false,"f":["eu","us","ree"]},"Zr":{"z":40,"name":"Zirconium","row":5,"col":4,"lg":1.563,"lo":1.412,"hi":1.728,"ng":25933,"nk":1054,"sg":0.0468,"sk":0.0158,"src":"Zirconium","top":"Australia","ts":0.333,"cn":0.067,"hhi":1777,"px":false,"f":["us"]},"Nb":{"z":41,"name":"Niobium","row":5,"col":5,"lg":0.756,"lo":0.63,"hi":0.891,"ng":19104,"nk":1118,"sg":0.0345,"sk":0.0204,"src":"Niobium","top":"Brazil","ts":0.909,"cn":0.0,"hhi":8307,"px":false,"f":["eu","us"]},"Mo":{"z":42,"name":"Molybdenum","row":5,"col":6,"lg":-0.491,"lo":-0.579,"hi":-0.388,"ng":16028,"nk":1517,"sg":0.0289,"sk":0.0406,"src":"Molybdenum","top":"China","ts":0.417,"cn":0.417,"hhi":2405,"px":false,"f":[]},"Tc":{"z":43,"name":"Technetium","row":5,"col":7,"lg":4.993,"lo":4.57,"hi":5.625,"ng":25055,"nk":112,"sg":0.0452,"sk":0.0014,"f":["rad"]},"Ru":{"z":44,"name":"Ruthenium","row":5,"col":8,"lg":2.755,"lo":2.584,"hi":2.928,"ng":57177,"nk":921,"sg":0.1032,"sk":0.0153,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"]},"Rh":{"z":45,"name":"Rhodium","row":5,"col":9,"lg":3.7,"lo":3.523,"hi":3.873,"ng":63082,"nk":1034,"sg":0.1139,"sk":0.0088,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"]},"Pd":{"z":46,"name":"Palladium","row":5,"col":10,"lg":2.472,"lo":2.338,"hi":2.638,"ng":39718,"nk":1389,"sg":0.0717,"sk":0.0129,"src":"Platinum","top":"Russia","ts":0.395,"cn":0.0,"hhi":3137,"px":false,"f":["eu","us","pgm"]},"Ag":{"z":47,"name":"Silver","row":5,"col":11,"lg":-0.004,"lo":-0.11,"hi":0.116,"ng":16074,"nk":1287,"sg":0.029,"sk":0.0291,"src":"Silver","top":"Mexico","ts":0.25,"cn":0.131,"hhi":1121,"px":false,"f":[]},"Cd":{"z":48,"name":"Cadmium","row":5,"col":12,"lg":1.409,"lo":1.27,"hi":1.514,"ng":36221,"nk":1241,"sg":0.0654,"sk":0.0246,"src":"Cadmium","top":"China","ts":0.388,"cn":0.388,"hhi":2038,"px":false,"f":[]},"In":{"z":49,"name":"Indium","row":5,"col":13,"lg":1.647,"lo":1.544,"hi":1.75,"ng":39470,"nk":1638,"sg":0.0712,"sk":0.0227,"src":"Indium","top":"China","ts":0.704,"cn":0.704,"hhi":5277,"px":false,"f":["us"]},"Sn":{"z":50,"name":"Tin","row":5,"col":14,"lg":1.351,"lo":1.252,"hi":1.471,"ng":39120,"nk":1943,"sg":0.0706,"sk":0.0277,"src":"Tin","top":"South Africa","ts":0.294,"cn":0.106,"hhi":1387,"px":false,"f":["us"]},"Sb":{"z":51,"name":"Antimony","row":5,"col":15,"lg":0.141,"lo":0.047,"hi":0.23,"ng":22570,"nk":1971,"sg":0.0407,"sk":0.0369,"src":"Antimony","top":"China","ts":0.577,"cn":0.577,"hhi":3793,"px":false,"f":["eu","us"]},"Te":{"z":52,"name":"Tellurium","row":5,"col":16,"lg":-1.562,"lo":-1.665,"hi":-1.474,"ng":7962,"nk":1962,"sg":0.0144,"sk":0.0424,"src":"Tellurium","top":"China","ts":0.765,"cn":0.765,"hhi":5978,"px":false,"f":["us"]},"I":{"z":53,"name":"Iodine","row":5,"col":17,"lg":-0.45,"lo":-0.568,"hi":-0.349,"ng":12198,"nk":1530,"sg":0.022,"sk":0.0301,"src":"Iodine","top":"Chile","ts":0.666,"cn":0.0,"hhi":5245,"px":false,"f":[]},"Xe":{"z":54,"name":"Xenon","row":5,"col":18,"f":[]},"Cs":{"z":55,"name":"Cesium","row":6,"col":1,"lg":-1.722,"lo":-1.792,"hi":-1.645,"ng":9872,"nk":1988,"sg":0.0178,"sk":0.0588,"f":["us"]},"Ba":{"z":56,"name":"Barium","row":6,"col":2,"lg":-2.126,"lo":-2.189,"hi":-2.064,"ng":10716,"nk":2784,"sg":0.0193,"sk":0.0844,"src":"Barite","top":"India","ts":0.317,"cn":0.256,"hhi":1931,"px":false,"f":["eu","us"]},"La":{"z":57,"name":"Lanthanum","row":9,"col":3,"lg":1.036,"lo":0.937,"hi":1.159,"ng":32490,"nk":1546,"sg":0.0586,"sk":0.0286,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"]},"Ce":{"z":58,"name":"Cerium","row":9,"col":4,"lg":0.739,"lo":0.604,"hi":0.878,"ng":15346,"nk":1244,"sg":0.0277,"sk":0.0166,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"]},"Pr":{"z":59,"name":"Praseodymium","row":9,"col":5,"lg":2.271,"lo":2.122,"hi":2.399,"ng":41064,"nk":1128,"sg":0.0741,"sk":0.0154,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Nd":{"z":60,"name":"Neodymium","row":9,"col":6,"lg":2.045,"lo":1.929,"hi":2.183,"ng":49240,"nk":1241,"sg":0.0889,"sk":0.0215,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Pm":{"z":61,"name":"Promethium","row":9,"col":7,"lg":7.283,"lo":7.111,"hi":7.417,"ng":937,"nk":2,"sg":0.0017,"sk":0.0,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","ree","f4","rad"]},"Sm":{"z":62,"name":"Samarium","row":9,"col":8,"lg":1.461,"lo":1.313,"hi":1.599,"ng":23182,"nk":1025,"sg":0.0418,"sk":0.0152,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Eu":{"z":63,"name":"Europium","row":9,"col":9,"lg":0.096,"lo":-0.095,"hi":0.263,"ng":7117,"nk":785,"sg":0.0129,"sk":0.012,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"]},"Gd":{"z":64,"name":"Gadolinium","row":9,"col":10,"lg":-0.205,"lo":-0.333,"hi":-0.055,"ng":6708,"nk":783,"sg":0.0121,"sk":0.014,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"]},"Tb":{"z":65,"name":"Terbium","row":9,"col":11,"lg":3.844,"lo":3.688,"hi":4.022,"ng":83821,"nk":939,"sg":0.1513,"sk":0.0105,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Dy":{"z":66,"name":"Dysprosium","row":9,"col":12,"lg":3.76,"lo":3.596,"hi":3.98,"ng":81762,"nk":929,"sg":0.1476,"sk":0.0109,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Ho":{"z":67,"name":"Holmium","row":9,"col":13,"lg":3.829,"lo":3.689,"hi":4.022,"ng":83833,"nk":890,"sg":0.1513,"sk":0.0106,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Er":{"z":68,"name":"Erbium","row":9,"col":14,"lg":3.511,"lo":3.325,"hi":3.698,"ng":77917,"nk":959,"sg":0.1406,"sk":0.0123,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Tm":{"z":69,"name":"Thulium","row":9,"col":15,"lg":4.171,"lo":3.927,"hi":4.363,"ng":66810,"nk":669,"sg":0.1206,"sk":0.0067,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Yb":{"z":70,"name":"Ytterbium","row":9,"col":16,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Lu":{"z":71,"name":"Lutetium","row":9,"col":17,"lg":3.531,"lo":3.296,"hi":3.746,"ng":48675,"nk":659,"sg":0.0878,"sk":0.0076,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Hf":{"z":72,"name":"Hafnium","row":6,"col":4,"lg":3.335,"lo":3.112,"hi":3.578,"ng":25391,"nk":564,"sg":0.0458,"sk":0.0045,"src":"Zirconium","top":"Australia","ts":0.333,"cn":0.067,"hhi":1777,"px":true,"f":["eu","us"]},"Ta":{"z":73,"name":"Tantalum","row":6,"col":5,"lg":1.378,"lo":1.231,"hi":1.538,"ng":18656,"nk":789,"sg":0.0337,"sk":0.0129,"src":"Tantalum","top":"Congo (Kinshasa)","ts":0.419,"cn":0.036,"hhi":2510,"px":false,"f":["eu","us"]},"W":{"z":74,"name":"Tungsten","row":6,"col":6,"lg":0.429,"lo":0.28,"hi":0.59,"ng":14044,"nk":772,"sg":0.0254,"sk":0.0188,"src":"Tungsten","top":"China","ts":0.823,"cn":0.823,"hhi":6812,"px":false,"f":["eu","us"]},"Re":{"z":75,"name":"Rhenium","row":6,"col":7,"lg":1.671,"lo":1.496,"hi":1.884,"ng":18302,"nk":575,"sg":0.033,"sk":0.0104,"src":"Rhenium","top":"Chile","ts":0.468,"cn":0.085,"hhi":2815,"px":false,"f":[]},"Os":{"z":76,"name":"Osmium","row":6,"col":8,"lg":2.948,"lo":2.751,"hi":3.189,"ng":35924,"nk":492,"sg":0.0648,"sk":0.0084,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","pgm"]},"Ir":{"z":77,"name":"Iridium","row":6,"col":9,"lg":3.77,"lo":3.615,"hi":3.965,"ng":73358,"nk":849,"sg":0.1324,"sk":0.0097,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"]},"Pt":{"z":78,"name":"Platinum","row":6,"col":10,"lg":2.92,"lo":2.753,"hi":3.081,"ng":53316,"nk":1194,"sg":0.0962,"sk":0.0127,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":false,"f":["eu","us","pgm"]},"Au":{"z":79,"name":"Gold","row":6,"col":11,"lg":2.035,"lo":1.874,"hi":2.196,"ng":21011,"nk":968,"sg":0.0379,"sk":0.0092,"src":"Gold","top":"China","ts":0.115,"cn":0.115,"hhi":465,"px":false,"f":[]},"Hg":{"z":80,"name":"Mercury","row":6,"col":12,"lg":0.693,"lo":0.574,"hi":0.846,"ng":18603,"nk":859,"sg":0.0336,"sk":0.0208,"src":"Mercury","top":"China","ts":0.833,"cn":0.833,"hhi":7023,"px":false,"f":[]},"Tl":{"z":81,"name":"Thallium","row":6,"col":13,"lg":-0.657,"lo":-0.783,"hi":-0.511,"ng":6866,"nk":1039,"sg":0.0124,"sk":0.0195,"f":[]},"Pb":{"z":82,"name":"Lead","row":6,"col":14,"lg":0.035,"lo":-0.076,"hi":0.14,"ng":18027,"nk":1323,"sg":0.0325,"sk":0.0318,"src":"Lead","top":"China","ts":0.438,"cn":0.438,"hhi":2180,"px":false,"f":[]},"Bi":{"z":83,"name":"Bismuth","row":6,"col":15,"lg":0.974,"lo":0.853,"hi":1.087,"ng":28200,"nk":1297,"sg":0.0509,"sk":0.0259,"src":"Bismuth","top":"China","ts":0.812,"cn":0.812,"hhi":6699,"px":false,"f":["eu","us"]},"Po":{"z":84,"name":"Polonium","row":6,"col":16,"f":["rad"]},"At":{"z":85,"name":"Astatine","row":6,"col":17,"f":["rad"]},"Rn":{"z":86,"name":"Radon","row":6,"col":18,"f":["rad"]},"Fr":{"z":87,"name":"Francium","row":7,"col":1,"f":["rad"]},"Ra":{"z":88,"name":"Radium","row":7,"col":2,"f":["rad"]},"Ac":{"z":89,"name":"Actinium","row":10,"col":3,"lg":9.339,"lo":8.599,"hi":10.321,"ng":7725,"nk":7,"sg":0.0139,"sk":0.0,"f":["rad"]},"Th":{"z":90,"name":"Thorium","row":10,"col":4,"lg":3.027,"lo":2.818,"hi":3.31,"ng":24559,"nk":498,"sg":0.0443,"sk":0.0054,"f":["rad"]},"Pa":{"z":91,"name":"Protactinium","row":10,"col":5,"lg":7.773,"lo":6.64,"hi":9.1,"ng":12575,"nk":33,"sg":0.0227,"sk":0.0001,"f":["rad"]},"U":{"z":92,"name":"Uranium","row":10,"col":6,"lg":-1.015,"lo":-1.134,"hi":-0.891,"ng":7991,"nk":1358,"sg":0.0144,"sk":0.0291,"f":["rad"]},"Np":{"z":93,"name":"Neptunium","row":10,"col":7,"lg":1.163,"lo":0.824,"hi":1.556,"ng":4166,"nk":220,"sg":0.0075,"sk":0.0034,"f":["rad"]},"Pu":{"z":94,"name":"Plutonium","row":10,"col":8,"lg":1.361,"lo":0.958,"hi":1.813,"ng":2754,"nk":239,"sg":0.005,"sk":0.0019,"f":["rad"]},"Am":{"z":95,"name":"Americium","row":10,"col":9,"f":["rad"]},"Cm":{"z":96,"name":"Curium","row":10,"col":10,"f":["rad"]},"Bk":{"z":97,"name":"Berkelium","row":10,"col":11,"f":["rad"]},"Cf":{"z":98,"name":"Californium","row":10,"col":12,"f":["rad"]},"Es":{"z":99,"name":"Einsteinium","row":10,"col":13,"f":["rad"]},"Fm":{"z":100,"name":"Fermium","row":10,"col":14,"f":["rad"]},"Md":{"z":101,"name":"Mendelevium","row":10,"col":15,"f":["rad"]},"No":{"z":102,"name":"Nobelium","row":10,"col":16,"f":["rad"]},"Lr":{"z":103,"name":"Lawrencium","row":10,"col":17,"f":["rad"]}},"main":{"MP_known":[{"m":"crm_eu_atom","g":0.5902,"k":0.5155,"d":0.0747,"lo":0.0553,"hi":0.0941},{"m":"crm_us_atom","g":0.6069,"k":0.4389,"d":0.168,"lo":0.149,"hi":0.187},{"m":"has_ree","g":0.7193,"k":0.4515,"d":0.2678,"lo":0.2338,"hi":0.3019},{"m":"has_f_in_core","g":0.597,"k":0.2707,"d":0.3263,"lo":0.2938,"hi":0.3588},{"m":"has_pgm","g":0.4136,"k":0.1873,"d":0.2263,"lo":0.197,"hi":0.2555},{"m":"hhi_p","g":4808.1322,"k":3171.1204,"d":1637.0118,"lo":1562.7894,"hi":1711.2343}],"MP_theoretical":[{"m":"crm_eu_atom","g":0.5902,"k":0.5172,"d":0.0729,"lo":0.0617,"hi":0.0842},{"m":"crm_us_atom","g":0.6069,"k":0.497,"d":0.1099,"lo":0.0981,"hi":0.1217},{"m":"has_ree","g":0.7193,"k":0.4604,"d":0.2589,"lo":0.2395,"hi":0.2783},{"m":"has_f_in_core","g":0.597,"k":0.2411,"d":0.3559,"lo":0.3375,"hi":0.3744},{"m":"has_pgm","g":0.4136,"k":0.1812,"d":0.2323,"lo":0.2151,"hi":0.2496},{"m":"hhi_p","g":4808.1322,"k":3207.2311,"d":1600.9011,"lo":1555.0203,"hi":1646.7819}],"EXT_CODED":[{"m":"crm_eu_atom","g":0.6268,"k":0.5508,"d":0.076,"lo":0.0693,"hi":0.0827},{"m":"crm_us_atom","g":0.6252,"k":0.6004,"d":0.0248,"lo":0.0167,"hi":0.0328},{"m":"has_ree","g":0.768,"k":0.6682,"d":0.0999,"lo":0.0895,"hi":0.1103},{"m":"has_f_in_core","g":0.6605,"k":0.5099,"d":0.1506,"lo":0.1365,"hi":0.1647},{"m":"has_pgm","g":0.4657,"k":0.453,"d":0.0128,"lo":-0.0035,"hi":0.0291},{"m":"hhi_p","g":4924.6752,"k":4179.9907,"d":744.6845,"lo":714.6936,"hi":774.6754}]},"cov":{"MP_known":0.7258,"MP_theoretical":0.7258,"EXT_CODED":1.0},"dec":[{"m":"crm_eu_atom","gap":0.2534,"mix":0.1788,"within":0.0747,"share":0.7053,"ci":[0.631,0.776]},{"m":"crm_us_atom","gap":0.2674,"mix":0.0994,"within":0.168,"share":0.3718,"ci":[0.304,0.439]},{"m":"has_ree","gap":0.4146,"mix":0.1468,"within":0.2678,"share":0.3541,"ci":[0.281,0.428]},{"m":"has_f_in_core","gap":0.4185,"mix":0.0922,"within":0.3263,"share":0.2203,"ci":[0.14,0.307]},{"m":"has_pgm","gap":0.2937,"mix":0.0674,"within":0.2263,"share":0.2295,"ci":[0.126,0.314]},{"m":"hhi_p","gap":2047.9867,"mix":410.9749,"within":1637.0118,"share":0.2007,"ci":[0.162,0.239]}],"uni":[{"fam":"rare earths","grp":"GNoME","obs":0.768,"exp":0.6183,"ratio":1.2422},{"fam":"rare earths","grp":"MP_known","obs":0.3034,"exp":0.5177,"ratio":0.5861},{"fam":"rare earths","grp":"MP_theoretical","obs":0.2472,"exp":0.5468,"ratio":0.4521},{"fam":"rare earths","grp":"EXT_MP","obs":0.4564,"exp":0.5014,"ratio":0.9102},{"fam":"rare earths","grp":"EXT_CODED","obs":0.4374,"exp":0.5238,"ratio":0.835},{"fam":"f-in-core lanthanides","grp":"GNoME","obs":0.6605,"exp":0.4512,"ratio":1.4637},{"fam":"f-in-core lanthanides","grp":"MP_known","obs":0.1778,"exp":0.3674,"ratio":0.4841},{"fam":"f-in-core lanthanides","grp":"MP_theoretical","obs":0.127,"exp":0.3916,"ratio":0.3244},{"fam":"f-in-core lanthanides","grp":"EXT_MP","obs":0.2897,"exp":0.3525,"ratio":0.8217},{"fam":"f-in-core lanthanides","grp":"EXT_CODED","obs":0.2784,"exp":0.3708,"ratio":0.7509},{"fam":"Pt-group metals","grp":"GNoME","obs":0.4657,"exp":0.2723,"ratio":1.7107},{"fam":"Pt-group metals","grp":"MP_known","obs":0.119,"exp":0.2165,"ratio":0.5499},{"fam":"Pt-group metals","grp":"MP_theoretical","obs":0.0696,"exp":0.2326,"ratio":0.299},{"fam":"Pt-group metals","grp":"EXT_MP","obs":0.2157,"exp":0.2059,"ratio":1.0473},{"fam":"Pt-group metals","grp":"EXT_CODED","obs":0.2377,"exp":0.2178,"ratio":1.091},{"fam":"EU critical","grp":"GNoME","obs":0.9783,"exp":0.9587,"ratio":1.0205},{"fam":"EU critical","grp":"MP_known","obs":0.8033,"exp":0.9011,"ratio":0.8914},{"fam":"EU critical","grp":"MP_theoretical","obs":0.8862,"exp":0.9185,"ratio":0.9648},{"fam":"EU critical","grp":"EXT_MP","obs":0.9021,"exp":0.8973,"ratio":1.0053},{"fam":"EU critical","grp":"EXT_CODED","obs":0.8748,"exp":0.9119,"ratio":0.9593}],"marg":{"has_f_in_core":{"yes":0.6184,"no":0.4503,"medy":18.6,"medn":28.5,"orr":1.8278,"lo":1.8063,"hi":1.8495},"has_ree":{"yes":0.5956,"no":0.4479,"medy":19.7,"medn":28.9,"orr":1.6164,"lo":1.5953,"hi":1.6378},"has_u_element":{"yes":0.579,"no":0.5539,"medy":20.5,"medn":21.7,"orr":1.0706,"lo":1.058,"hi":1.0834}},"margOQ":{"has_f_in_core":{"yes":0.7372,"no":0.6079,"medy":13.2,"medn":18.4,"orr":1.7051,"lo":1.684,"hi":1.7264},"has_ree":{"yes":0.7218,"no":0.5989,"medy":13.8,"medn":18.7,"orr":1.5873,"lo":1.5658,"hi":1.6092},"has_u_element":{"yes":0.6985,"no":0.6911,"medy":14.7,"medn":14.7,"orr":1.0071,"lo":0.9943,"hi":1.02}},"eg":[{"app":"cathode","sub":"all","n":15533,"m":"crm_eu_atom","s":0.4284,"k":0.1952},{"app":"cathode","sub":"all","n":15533,"m":"crm_us_atom","s":0.4947,"k":0.1732},{"app":"cathode","sub":"all","n":15533,"m":"has_ree","s":0.558,"k":0.2179},{"app":"cathode","sub":"all","n":15533,"m":"has_f_in_core","s":0.4138,"k":0.1141},{"app":"cathode","sub":"all","n":15533,"m":"has_pgm","s":0.3404,"k":0.0655},{"app":"cathode","sub":"all","n":15533,"m":"hhi_p","s":4078.8384,"k":1875.6138},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"crm_eu_atom","s":0.2626,"k":0.2023},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"crm_us_atom","s":0.3692,"k":0.181},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_ree","s":0.4107,"k":0.2237},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_f_in_core","s":0.2738,"k":0.1181},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_pgm","s":0.1592,"k":0.0678},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"hhi_p","s":3280.0753,"k":1916.5907},{"app":"perovskite","sub":"all","n":2852,"m":"crm_eu_atom","s":0.2668,"k":0.1773},{"app":"perovskite","sub":"all","n":2852,"m":"crm_us_atom","s":0.2972,"k":0.1546},{"app":"perovskite","sub":"all","n":2852,"m":"has_ree","s":0.5957,"k":0.2008},{"app":"perovskite","sub":"all","n":2852,"m":"has_f_in_core","s":0.4681,"k":0.1033},{"app":"perovskite","sub":"all","n":2852,"m":"has_pgm","s":0.2146,"k":0.0623},{"app":"perovskite","sub":"all","n":2852,"m":"hhi_p","s":2916.7697,"k":1776.0053},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"crm_eu_atom","s":0.2688,"k":0.169},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"crm_us_atom","s":0.2791,"k":0.1455},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_ree","s":0.628,"k":0.1939},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_f_in_core","s":0.4641,"k":0.0985},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_pgm","s":0.227,"k":0.0596},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"hhi_p","s":2472.2016,"k":1727.5306},{"app":"thermoelectric","sub":"all","n":9056,"m":"crm_eu_atom","s":0.6217,"k":0.2103},{"app":"thermoelectric","sub":"all","n":9056,"m":"crm_us_atom","s":0.8218,"k":0.1893},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_ree","s":0.5205,"k":0.2314},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_f_in_core","s":0.4007,"k":0.1229},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_pgm","s":0.2413,"k":0.0687},{"app":"thermoelectric","sub":"all","n":9056,"m":"hhi_p","s":4580.8152,"k":1961.1321},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"crm_eu_atom","s":0.5643,"k":0.2258},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"crm_us_atom","s":0.7739,"k":0.2065},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_ree","s":0.3015,"k":0.2443},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_f_in_core","s":0.1826,"k":0.1317},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_pgm","s":0.3186,"k":0.0741},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"hhi_p","s":4410.5029,"k":2051.8597}],"alt":[{"app":"cathode","sub":"Al","n":5117,"hr":0.7471,"a1":1.0,"ma":67.0,"ph":18.053,"pl":28.7009,"p":0.0},{"app":"cathode","sub":"Ca","n":878,"hr":0.0091,"a1":1.0,"ma":17.0,"ph":25.1893,"pl":214.5384,"p":0.0207},{"app":"cathode","sub":"Cs","n":3288,"hr":0.1271,"a1":1.0,"ma":133.0,"ph":48.0095,"pl":45.9802,"p":0.1375},{"app":"cathode","sub":"K","n":887,"hr":0.2638,"a1":1.0,"ma":18.0,"ph":26.4241,"pl":107.3825,"p":0.0},{"app":"cathode","sub":"Li","n":308,"hr":0.0747,"a1":0.9565,"ma":9.0,"ph":441.6945,"pl":185.939,"p":0.0036},{"app":"cathode","sub":"Mg","n":735,"hr":0.4762,"a1":0.9257,"ma":7.0,"ph":26.7423,"pl":86.5412,"p":0.0},{"app":"cathode","sub":"Na","n":514,"hr":0.2276,"a1":0.9829,"ma":17.0,"ph":37.886,"pl":58.26,"p":0.0},{"app":"cathode","sub":"Rb","n":2480,"hr":0.0996,"a1":1.0,"ma":75.0,"ph":13.8726,"pl":18.8087,"p":0.0021},{"app":"cathode","sub":"Y","n":1774,"hr":0.27,"a1":1.0,"ma":31.0,"ph":38.7746,"pl":116.2719,"p":0.0},{"app":"perovskite","sub":"mixed","n":2823,"hr":0.0255,"a1":1.0,"ma":310.0,"ph":-1.2274,"pl":-0.9921,"p":0.0},{"app":"perovskite","sub":"pure","n":2823,"hr":0.0255,"a1":1.0,"ma":509.5,"ph":-0.4869,"pl":-0.3593,"p":0.0006},{"app":"thermoelectric","sub":"300K","n":8178,"hr":0.5995,"a1":0.9986,"ma":301.0,"ph":0.1127,"pl":0.1681,"p":0.0},{"app":"thermoelectric","sub":"430K","n":5431,"hr":0.5999,"a1":0.9979,"ma":281.0,"ph":0.2257,"pl":0.2782,"p":0.0},{"app":"thermoelectric","sub":"560K","n":4919,"hr":0.5959,"a1":0.9962,"ma":342.0,"ph":0.3889,"pl":0.4519,"p":0.0},{"app":"thermoelectric","sub":"690K","n":6019,"hr":0.6086,"a1":0.9992,"ma":530.0,"ph":0.508,"pl":0.5495,"p":0.0},{"app":"thermoelectric","sub":"820K","n":4356,"hr":0.5854,"a1":0.9992,"ma":432.5,"ph":0.6112,"pl":0.6974,"p":0.0},{"app":"thermoelectric","sub":"950K","n":3986,"hr":0.5873,"a1":0.9987,"ma":438.0,"ph":0.6847,"pl":0.7853,"p":0.0}],"prof":[{"c":"China","g":0.4033,"k":0.3758},{"c":"South Africa","g":0.1063,"k":0.052},{"c":"Australia","g":0.0403,"k":0.0681},{"c":"Turkey","g":0.0241,"k":0.0366},{"c":"Congo (Kinshasa)","g":0.0266,"k":0.0238},{"c":"Russia","g":0.0449,"k":0.0419},{"c":"United States","g":0.0502,"k":0.031},{"c":"Indonesia","g":0.0205,"k":0.031},{"c":"Brazil","g":0.0184,"k":0.0323},{"c":"Guinea","g":0.0104,"k":0.0361},{"c":"Other Countries","g":0.0208,"k":0.0233},{"c":"India","g":0.0127,"k":0.0266}],"cc":{"hhi_new":{"g":4173.9208,"k":3722.8413,"lo":365.6289,"hi":536.5301},"china_frac":{"g":0.4029,"k":0.3421,"lo":0.0512,"hi":0.0705},"conc_frac":{"g":0.6587,"k":0.5266,"lo":0.1075,"hi":0.1567},"top_share_max":{"g":0.73,"k":0.7142,"lo":0.0064,"hi":0.0252}},"big":[{"st":"4_intermetallic","grp":"EXT_CODED","ree":0.7126,"f4":0.5109,"eu":0.6465,"n":4314},{"st":"4_intermetallic","grp":"GNoME","ree":0.8016,"f4":0.6751,"eu":0.7248,"n":232824},{"st":"4_intermetallic","grp":"MP_known","ree":0.558,"f4":0.3406,"eu":0.6685,"n":276},{"st":"4_intermetallic","grp":"MP_theoretical","ree":0.6002,"f4":0.3164,"eu":0.6228,"n":828},{"st":"5_intermetallic","grp":"EXT_CODED","ree":0.9273,"f4":0.8218,"eu":0.6446,"n":275},{"st":"5_intermetallic","grp":"GNoME","ree":0.8971,"f4":0.8284,"eu":0.7238,"n":151902},{"st":"5_intermetallic","grp":"MP_known","ree":1.0,"f4":0.5,"eu":0.3125,"n":2},{"st":"5_intermetallic","grp":"MP_theoretical","ree":0.5625,"f4":0.4062,"eu":0.7914,"n":32}],"null":{"A":0.04,"family":0.06,"B":0.07,"C":0.06}}</script>
+<section id="limits"><div class="wrap">
+  <h2>What this study cannot show</h2>
+  <ul class="limits">
+    <li>It looks at the elements materials contain. It does not show whether any material can be made.</li>
+    <li>Known materials reflect the choices of experimental chemists, so the gap is measured against experimental practice, which has its own preferences.</li>
+    <li>Many GNoME entries may be ordered versions of disordered phases. The study does not correct for this.</li>
+    <li>It does not test the frozen-4f approximation. That needs calculations with explicit 4f electrons.</li>
+    <li>Five-element metal-only compounds can only be compared with other computed databases, and the four-element metal-only type rests on 276 known compounds (the result holds without it).</li>
+    <li>Application performance values are machine-learning predictions.</li>
+    <li>Country data come from mine production and group some elements together.</li>
+    <li>All results refer to the August 2024 release of the GNoME data, and the audit has so far been applied to this one dataset.</li>
+  </ul>
+</div></section>
+</main>
+
+<footer id="reproduce"><div class="wrap">
+  <h2>Reproduce the results</h2>
+  <ol>
+    <li>Open <code>critical_element_audit.ipynb</code> from this repository in Google Colab.</li>
+    <li>For a quick test, set <code>DEMO_MODE = True</code> and run all cells. It uses fake data and checks that the code works.</li>
+    <li>For the real run, add a free Materials Project API key as the Colab secret <code>MP_API_KEY</code>, set <code>DEMO_MODE = False</code> and run all cells. The first run downloads about 2 GB; later runs reuse the saved table on Google Drive.</li>
+    <li>The checks added in revision are in Level 5 of the notebook (R1 to R8). To run only those, keep <code>USE_CHECKPOINT = True</code>, run sections 1 to 5, then the Level 5 cells. They write the <code>R</code> files in <code>results/</code>.</li>
+  </ol>
+  <p>Data sources: GNoME (CC BY-NC 4.0), Materials Project (CC BY 4.0), Energy-GNoME, and USGS Mineral Commodity Summaries 2025. Code under the MIT licence.</p>
+</div></footer>
+
+<div id="tip" role="tooltip"></div>
+<script id="data" type="application/json">{"els":{"H":{"z":1,"name":"Hydrogen","row":1,"col":1,"lg":-4.675,"lo":-4.718,"hi":-4.631,"ng":6725,"nk":6347,"sg":0.0121,"sk":0.3101,"f":[],"rt":0.189,"rtlo":0.174,"rthi":0.203},"He":{"z":2,"name":"Helium","row":1,"col":18,"f":[]},"Li":{"z":3,"name":"Lithium","row":2,"col":1,"lg":-0.647,"lo":-0.723,"hi":-0.557,"ng":21593,"nk":2081,"sg":0.039,"sk":0.061,"src":"Lithium","top":"Australia","ts":0.367,"cn":0.171,"hhi":2215,"px":false,"f":["eu","us"],"rt":0.514,"rtlo":0.409,"rthi":0.692},"Be":{"z":4,"name":"Beryllium","row":2,"col":2,"lg":0.193,"lo":0.001,"hi":0.378,"ng":7555,"nk":423,"sg":0.0136,"sk":0.0119,"src":"Beryllium","top":"United States","ts":0.495,"cn":0.212,"hhi":3420,"px":false,"f":["eu","us"],"rt":2.509,"rtlo":1.396,"rthi":4.289},"B":{"z":5,"name":"Boron","row":2,"col":13,"lg":-0.09,"lo":-0.161,"hi":-0.02,"ng":39305,"nk":3194,"sg":0.0709,"sk":0.0755,"src":"Boron","top":"Turkey","ts":0.656,"cn":0.074,"hhi":4534,"px":false,"f":["eu"],"rt":0.218,"rtlo":0.19,"rthi":0.255},"C":{"z":6,"name":"Carbon","row":2,"col":14,"lg":-2.523,"lo":-2.567,"hi":-2.469,"ng":16647,"nk":4641,"sg":0.0301,"sk":0.1726,"src":"Graphite","top":"China","ts":0.779,"cn":0.779,"hhi":6143,"px":false,"f":["us"],"rt":0.132,"rtlo":0.116,"rthi":0.154},"N":{"z":7,"name":"Nitrogen","row":2,"col":15,"lg":-3.296,"lo":-3.344,"hi":-3.241,"ng":10991,"nk":5125,"sg":0.0198,"sk":0.1949,"src":"Nitrogen","top":"China","ts":0.306,"cn":0.306,"hhi":1278,"px":false,"f":[],"rt":0.454,"rtlo":0.42,"rthi":0.488},"O":{"z":8,"name":"Oxygen","row":2,"col":16,"lg":-3.15,"lo":-3.166,"hi":-3.132,"ng":44611,"nk":20671,"sg":0.0805,"sk":0.7148,"f":[],"rt":0.488,"rtlo":0.454,"rthi":0.521},"F":{"z":9,"name":"Fluorine","row":2,"col":17,"lg":-2.575,"lo":-2.637,"hi":-2.5,"ng":10639,"nk":3521,"sg":0.0192,"sk":0.1144,"src":"Fluorspar","top":"China","ts":0.621,"cn":0.621,"hhi":4200,"px":false,"f":["us"],"rt":0.728,"rtlo":0.668,"rthi":0.784},"Ne":{"z":10,"name":"Neon","row":2,"col":18,"f":[]},"Na":{"z":11,"name":"Sodium","row":3,"col":1,"lg":-2.713,"lo":-2.775,"hi":-2.65,"ng":9511,"nk":3046,"sg":0.0172,"sk":0.1125,"src":"Salt","top":"China","ts":0.196,"cn":0.196,"hhi":831,"px":false,"f":[],"rt":0.178,"rtlo":0.144,"rthi":0.225},"Mg":{"z":12,"name":"Magnesium","row":3,"col":2,"lg":0.0,"lo":-0.152,"hi":0.098,"ng":19775,"nk":1476,"sg":0.0357,"sk":0.0357,"src":"Magnesium Metal","top":"China","ts":0.909,"cn":0.909,"hhi":8280,"px":false,"f":["eu","us"],"rt":0.342,"rtlo":0.264,"rthi":0.472},"Al":{"z":13,"name":"Aluminum","row":3,"col":13,"lg":0.914,"lo":0.82,"hi":0.986,"ng":50161,"nk":2479,"sg":0.0905,"sk":0.0481,"src":"Bauxite","top":"Guinea","ts":0.289,"cn":0.206,"hhi":1895,"px":false,"f":["us"],"rt":0.736,"rtlo":0.594,"rthi":0.954},"Si":{"z":14,"name":"Silicon","row":3,"col":14,"lg":0.799,"lo":0.734,"hi":0.867,"ng":79738,"nk":3776,"sg":0.1439,"sk":0.0827,"src":"Silicon","top":"China","ts":0.686,"cn":0.686,"hhi":4843,"px":false,"f":[],"rt":0.75,"rtlo":0.636,"rthi":0.907},"P":{"z":15,"name":"Phosphorus","row":3,"col":15,"lg":-1.126,"lo":-1.171,"hi":-1.072,"ng":43262,"nk":5075,"sg":0.0781,"sk":0.1704,"src":"Phosphate","top":"China","ts":0.458,"cn":0.458,"hhi":2425,"px":false,"f":["eu"],"rt":0.425,"rtlo":0.365,"rthi":0.506},"S":{"z":16,"name":"Sulfur","row":3,"col":16,"lg":-3.115,"lo":-3.168,"hi":-3.063,"ng":10312,"nk":5736,"sg":0.0186,"sk":0.1613,"src":"Sulfur","top":"China","ts":0.223,"cn":0.223,"hhi":937,"px":false,"f":[],"rt":0.467,"rtlo":0.432,"rthi":0.503},"Cl":{"z":17,"name":"Chlorine","row":3,"col":17,"lg":-3.026,"lo":-3.091,"hi":-2.954,"ng":7423,"nk":3431,"sg":0.0134,"sk":0.1091,"src":"Salt","top":"China","ts":0.196,"cn":0.196,"hhi":831,"px":false,"f":[],"rt":0.515,"rtlo":0.474,"rthi":0.554},"Ar":{"z":18,"name":"Argon","row":3,"col":18,"f":[]},"K":{"z":19,"name":"Potassium","row":4,"col":1,"lg":-2.917,"lo":-2.986,"hi":-2.854,"ng":9403,"nk":3499,"sg":0.017,"sk":0.1282,"src":"Potash","top":"Canada","ts":0.31,"cn":0.13,"hhi":1778,"px":false,"f":[],"rt":0.172,"rtlo":0.142,"rthi":0.213},"Ca":{"z":20,"name":"Calcium","row":4,"col":2,"lg":-0.761,"lo":-0.862,"hi":-0.68,"ng":16965,"nk":1931,"sg":0.0306,"sk":0.0519,"f":[],"rt":0.85,"rtlo":0.636,"rthi":1.202},"Sc":{"z":21,"name":"Scandium","row":4,"col":3,"lg":2.449,"lo":2.284,"hi":2.621,"ng":35772,"nk":756,"sg":0.0646,"sk":0.0118,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"],"rt":2.574,"rtlo":1.649,"rthi":4.879},"Ti":{"z":22,"name":"Titanium","row":4,"col":4,"lg":0.761,"lo":0.645,"hi":0.886,"ng":20968,"nk":1202,"sg":0.0379,"sk":0.0223,"src":"Titanium Mineral","top":"China","ts":0.351,"cn":0.351,"hhi":1961,"px":false,"f":["eu","us"],"rt":1.079,"rtlo":0.742,"rthi":1.736},"V":{"z":23,"name":"Vanadium","row":4,"col":5,"lg":-1.195,"lo":-1.285,"hi":-1.098,"ng":11763,"nk":1667,"sg":0.0212,"sk":0.0486,"src":"Vanadium","top":"China","ts":0.68,"cn":0.68,"hhi":5080,"px":false,"f":["eu","us"],"rt":1.11,"rtlo":0.838,"rthi":1.436},"Cr":{"z":24,"name":"Chromium","row":4,"col":6,"lg":-0.765,"lo":-0.914,"hi":-0.609,"ng":8614,"nk":1189,"sg":0.0155,"sk":0.0264,"src":"Chromium","top":"South Africa","ts":0.447,"cn":0.0,"hhi":2584,"px":false,"f":["us"],"rt":0.712,"rtlo":0.472,"rthi":1.152},"Mn":{"z":25,"name":"Manganese","row":4,"col":7,"lg":-0.704,"lo":-0.789,"hi":-0.625,"ng":17929,"nk":2139,"sg":0.0324,"sk":0.0527,"src":"Manganese","top":"South Africa","ts":0.37,"cn":0.038,"hhi":2158,"px":false,"f":["eu","us"],"rt":0.393,"rtlo":0.31,"rthi":0.526},"Fe":{"z":26,"name":"Iron","row":4,"col":8,"lg":-0.439,"lo":-0.527,"hi":-0.362,"ng":25109,"nk":2559,"sg":0.0453,"sk":0.0614,"src":"Iron Ore","top":"Australia","ts":0.372,"cn":0.108,"hhi":1980,"px":false,"f":[],"rt":0.375,"rtlo":0.306,"rthi":0.487},"Co":{"z":27,"name":"Cobalt","row":4,"col":9,"lg":1.215,"lo":1.13,"hi":1.301,"ng":61348,"nk":2408,"sg":0.1107,"sk":0.0477,"src":"Cobalt","top":"Congo (Kinshasa)","ts":0.759,"cn":0.0,"hhi":5867,"px":false,"f":["eu","us"],"rt":0.85,"rtlo":0.675,"rthi":1.11},"Ni":{"z":28,"name":"Nickel","row":4,"col":10,"lg":1.041,"lo":0.95,"hi":1.162,"ng":39991,"nk":2593,"sg":0.0722,"sk":0.0351,"src":"Nickel","top":"Indonesia","ts":0.595,"cn":0.032,"hhi":3706,"px":false,"f":["eu","us"],"rt":0.52,"rtlo":0.427,"rthi":0.663},"Cu":{"z":29,"name":"Copper","row":4,"col":11,"lg":-1.374,"lo":-1.435,"hi":-1.305,"ng":19474,"nk":3053,"sg":0.0352,"sk":0.0911,"src":"Copper","top":"Chile","ts":0.23,"cn":0.078,"hhi":1035,"px":false,"f":["eu"],"rt":0.397,"rtlo":0.321,"rthi":0.5},"Zn":{"z":30,"name":"Zinc","row":4,"col":12,"lg":0.081,"lo":-0.016,"hi":0.189,"ng":27167,"nk":1778,"sg":0.049,"sk":0.0464,"src":"Zinc","top":"China","ts":0.333,"cn":0.333,"hhi":1476,"px":false,"f":["us"],"rt":1.389,"rtlo":0.996,"rthi":1.959},"Ga":{"z":31,"name":"Gallium","row":4,"col":13,"lg":1.647,"lo":1.534,"hi":1.769,"ng":43080,"nk":1768,"sg":0.0777,"sk":0.0248,"src":"Gallium","top":"China","ts":0.984,"cn":0.984,"hhi":9688,"px":false,"f":["eu","us"],"rt":1.161,"rtlo":0.907,"rthi":1.627},"Ge":{"z":32,"name":"Germanium","row":4,"col":14,"lg":-0.009,"lo":-0.097,"hi":0.083,"ng":18794,"nk":2651,"sg":0.0339,"sk":0.0341,"f":["eu","us"],"rt":0.344,"rtlo":0.276,"rthi":0.449},"As":{"z":33,"name":"Arsenic","row":4,"col":15,"lg":-0.422,"lo":-0.504,"hi":-0.336,"ng":19752,"nk":2026,"sg":0.0357,"sk":0.0478,"src":"Arsenic","top":"Peru","ts":0.464,"cn":0.412,"hhi":3957,"px":false,"f":["eu","us"],"rt":0.325,"rtlo":0.267,"rthi":0.408},"Se":{"z":34,"name":"Selenium","row":4,"col":16,"lg":-1.494,"lo":-1.576,"hi":-1.425,"ng":13696,"nk":2912,"sg":0.0247,"sk":0.0696,"src":"Selenium","top":"China","ts":0.486,"cn":0.486,"hhi":2894,"px":false,"f":[],"rt":1.409,"rtlo":1.293,"rthi":1.525},"Br":{"z":35,"name":"Bromine","row":4,"col":17,"lg":-0.379,"lo":-0.489,"hi":-0.262,"ng":14182,"nk":1424,"sg":0.0256,"sk":0.0333,"src":"Bromine","top":"Israel","ts":0.35,"cn":0.25,"hhi":2782,"px":false,"f":[],"rt":3.02,"rtlo":2.731,"rthi":3.299},"Kr":{"z":36,"name":"Krypton","row":4,"col":18,"f":[]},"Rb":{"z":37,"name":"Rubidium","row":5,"col":1,"lg":-1.425,"lo":-1.532,"hi":-1.331,"ng":10981,"nk":1769,"sg":0.0198,"sk":0.0532,"f":["us"],"rt":0.859,"rtlo":0.632,"rthi":1.228},"Sr":{"z":38,"name":"Strontium","row":5,"col":2,"lg":-1.042,"lo":-1.137,"hi":-0.955,"ng":13044,"nk":1825,"sg":0.0235,"sk":0.0485,"src":"Strontium","top":"Iran","ts":0.392,"cn":0.157,"hhi":3346,"px":false,"f":["eu"],"rt":0.835,"rtlo":0.625,"rthi":1.166},"Y":{"z":39,"name":"Yttrium","row":5,"col":3,"lg":2.727,"lo":2.593,"hi":2.859,"ng":79319,"nk":1205,"sg":0.1432,"sk":0.0216,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":false,"f":["eu","us","ree"],"rt":3.955,"rtlo":2.743,"rthi":6.051},"Zr":{"z":40,"name":"Zirconium","row":5,"col":4,"lg":1.563,"lo":1.412,"hi":1.728,"ng":25933,"nk":1054,"sg":0.0468,"sk":0.0158,"src":"Zirconium","top":"Australia","ts":0.333,"cn":0.067,"hhi":1777,"px":false,"f":["us"],"rt":1.173,"rtlo":0.845,"rthi":1.825},"Nb":{"z":41,"name":"Niobium","row":5,"col":5,"lg":0.756,"lo":0.63,"hi":0.891,"ng":19104,"nk":1118,"sg":0.0345,"sk":0.0204,"src":"Niobium","top":"Brazil","ts":0.909,"cn":0.0,"hhi":8307,"px":false,"f":["eu","us"],"rt":1.569,"rtlo":1.048,"rthi":2.966},"Mo":{"z":42,"name":"Molybdenum","row":5,"col":6,"lg":-0.491,"lo":-0.579,"hi":-0.388,"ng":16028,"nk":1517,"sg":0.0289,"sk":0.0406,"src":"Molybdenum","top":"China","ts":0.417,"cn":0.417,"hhi":2405,"px":false,"f":[],"rt":1.433,"rtlo":1.048,"rthi":1.919},"Tc":{"z":43,"name":"Technetium","row":5,"col":7,"lg":4.993,"lo":4.57,"hi":5.625,"ng":25055,"nk":112,"sg":0.0452,"sk":0.0014,"f":["rad"],"rt":78.547,"rtlo":61.416,"rthi":107.185},"Ru":{"z":44,"name":"Ruthenium","row":5,"col":8,"lg":2.755,"lo":2.584,"hi":2.928,"ng":57177,"nk":921,"sg":0.1032,"sk":0.0153,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"],"rt":2.437,"rtlo":1.736,"rthi":3.854},"Rh":{"z":45,"name":"Rhodium","row":5,"col":9,"lg":3.7,"lo":3.523,"hi":3.873,"ng":63082,"nk":1034,"sg":0.1139,"sk":0.0088,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"],"rt":1.668,"rtlo":1.22,"rthi":2.419},"Pd":{"z":46,"name":"Palladium","row":5,"col":10,"lg":2.472,"lo":2.338,"hi":2.638,"ng":39718,"nk":1389,"sg":0.0717,"sk":0.0129,"src":"Platinum","top":"Russia","ts":0.395,"cn":0.0,"hhi":3137,"px":false,"f":["eu","us","pgm"],"rt":4.197,"rtlo":2.953,"rthi":5.979},"Ag":{"z":47,"name":"Silver","row":5,"col":11,"lg":-0.004,"lo":-0.11,"hi":0.116,"ng":16074,"nk":1287,"sg":0.029,"sk":0.0291,"src":"Silver","top":"Mexico","ts":0.25,"cn":0.131,"hhi":1121,"px":false,"f":[],"rt":1.563,"rtlo":1.102,"rthi":2.18},"Cd":{"z":48,"name":"Cadmium","row":5,"col":12,"lg":1.409,"lo":1.27,"hi":1.514,"ng":36221,"nk":1241,"sg":0.0654,"sk":0.0246,"src":"Cadmium","top":"China","ts":0.388,"cn":0.388,"hhi":2038,"px":false,"f":[],"rt":1.06,"rtlo":0.746,"rthi":1.656},"In":{"z":49,"name":"Indium","row":5,"col":13,"lg":1.647,"lo":1.544,"hi":1.75,"ng":39470,"nk":1638,"sg":0.0712,"sk":0.0227,"src":"Indium","top":"China","ts":0.704,"cn":0.704,"hhi":5277,"px":false,"f":["us"],"rt":1.037,"rtlo":0.786,"rthi":1.513},"Sn":{"z":50,"name":"Tin","row":5,"col":14,"lg":1.351,"lo":1.252,"hi":1.471,"ng":39120,"nk":1943,"sg":0.0706,"sk":0.0277,"src":"Tin","top":"South Africa","ts":0.294,"cn":0.106,"hhi":1387,"px":false,"f":["us"],"rt":1.321,"rtlo":1.014,"rthi":1.848},"Sb":{"z":51,"name":"Antimony","row":5,"col":15,"lg":0.141,"lo":0.047,"hi":0.23,"ng":22570,"nk":1971,"sg":0.0407,"sk":0.0369,"src":"Antimony","top":"China","ts":0.577,"cn":0.577,"hhi":3793,"px":false,"f":["eu","us"],"rt":0.8,"rtlo":0.606,"rthi":1.096},"Te":{"z":52,"name":"Tellurium","row":5,"col":16,"lg":-1.562,"lo":-1.665,"hi":-1.474,"ng":7962,"nk":1962,"sg":0.0144,"sk":0.0424,"src":"Tellurium","top":"China","ts":0.765,"cn":0.765,"hhi":5978,"px":false,"f":["us"],"rt":1.363,"rtlo":1.244,"rthi":1.487},"I":{"z":53,"name":"Iodine","row":5,"col":17,"lg":-0.45,"lo":-0.568,"hi":-0.349,"ng":12198,"nk":1530,"sg":0.022,"sk":0.0301,"src":"Iodine","top":"Chile","ts":0.666,"cn":0.0,"hhi":5245,"px":false,"f":[],"rt":2.727,"rtlo":2.483,"rthi":3.008},"Xe":{"z":54,"name":"Xenon","row":5,"col":18,"f":[]},"Cs":{"z":55,"name":"Cesium","row":6,"col":1,"lg":-1.722,"lo":-1.792,"hi":-1.645,"ng":9872,"nk":1988,"sg":0.0178,"sk":0.0588,"f":["us"],"rt":0.685,"rtlo":0.516,"rthi":0.95},"Ba":{"z":56,"name":"Barium","row":6,"col":2,"lg":-2.126,"lo":-2.189,"hi":-2.064,"ng":10716,"nk":2784,"sg":0.0193,"sk":0.0844,"src":"Barite","top":"India","ts":0.317,"cn":0.256,"hhi":1931,"px":false,"f":["eu","us"],"rt":0.527,"rtlo":0.415,"rthi":0.679},"La":{"z":57,"name":"Lanthanum","row":9,"col":3,"lg":1.036,"lo":0.937,"hi":1.159,"ng":32490,"nk":1546,"sg":0.0586,"sk":0.0286,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"],"rt":1.215,"rtlo":0.922,"rthi":1.735},"Ce":{"z":58,"name":"Cerium","row":9,"col":4,"lg":0.739,"lo":0.604,"hi":0.878,"ng":15346,"nk":1244,"sg":0.0277,"sk":0.0166,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"],"rt":0.62,"rtlo":0.448,"rthi":0.928},"Pr":{"z":59,"name":"Praseodymium","row":9,"col":5,"lg":2.271,"lo":2.122,"hi":2.399,"ng":41064,"nk":1128,"sg":0.0741,"sk":0.0154,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":1.908,"rtlo":1.368,"rthi":3.115},"Nd":{"z":60,"name":"Neodymium","row":9,"col":6,"lg":2.045,"lo":1.929,"hi":2.183,"ng":49240,"nk":1241,"sg":0.0889,"sk":0.0215,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":2.766,"rtlo":1.952,"rthi":4.229},"Pm":{"z":61,"name":"Promethium","row":9,"col":7,"lg":7.283,"lo":7.111,"hi":7.417,"ng":937,"nk":2,"sg":0.0017,"sk":0.0,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","ree","f4","rad"],"rt":205.055,"rtlo":174.702,"rthi":237.292},"Sm":{"z":62,"name":"Samarium","row":9,"col":8,"lg":1.461,"lo":1.313,"hi":1.599,"ng":23182,"nk":1025,"sg":0.0418,"sk":0.0152,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":1.484,"rtlo":1.037,"rthi":2.587},"Eu":{"z":63,"name":"Europium","row":9,"col":9,"lg":0.096,"lo":-0.095,"hi":0.263,"ng":7117,"nk":785,"sg":0.0129,"sk":0.012,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"],"rt":1.062,"rtlo":0.66,"rthi":1.899},"Gd":{"z":64,"name":"Gadolinium","row":9,"col":10,"lg":-0.205,"lo":-0.333,"hi":-0.055,"ng":6708,"nk":783,"sg":0.0121,"sk":0.014,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree"],"rt":0.708,"rtlo":0.459,"rthi":1.24},"Tb":{"z":65,"name":"Terbium","row":9,"col":11,"lg":3.844,"lo":3.688,"hi":4.022,"ng":83821,"nk":939,"sg":0.1513,"sk":0.0105,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":3.373,"rtlo":2.358,"rthi":5.39},"Dy":{"z":66,"name":"Dysprosium","row":9,"col":12,"lg":3.76,"lo":3.596,"hi":3.98,"ng":81762,"nk":929,"sg":0.1476,"sk":0.0109,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":3.661,"rtlo":2.592,"rthi":6.294},"Ho":{"z":67,"name":"Holmium","row":9,"col":13,"lg":3.829,"lo":3.689,"hi":4.022,"ng":83833,"nk":890,"sg":0.1513,"sk":0.0106,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":4.654,"rtlo":3.14,"rthi":7.879},"Er":{"z":68,"name":"Erbium","row":9,"col":14,"lg":3.511,"lo":3.325,"hi":3.698,"ng":77917,"nk":959,"sg":0.1406,"sk":0.0123,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":3.991,"rtlo":2.689,"rthi":6.876},"Tm":{"z":69,"name":"Thulium","row":9,"col":15,"lg":4.171,"lo":3.927,"hi":4.363,"ng":66810,"nk":669,"sg":0.1206,"sk":0.0067,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":4.257,"rtlo":2.766,"rthi":8.049},"Yb":{"z":70,"name":"Ytterbium","row":9,"col":16,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"]},"Lu":{"z":71,"name":"Lutetium","row":9,"col":17,"lg":3.531,"lo":3.296,"hi":3.746,"ng":48675,"nk":659,"sg":0.0878,"sk":0.0076,"src":"Rare Earth","top":"China","ts":0.685,"cn":0.685,"hhi":4924,"px":true,"f":["eu","us","ree","f4"],"rt":5.056,"rtlo":3.014,"rthi":10.799},"Hf":{"z":72,"name":"Hafnium","row":6,"col":4,"lg":3.335,"lo":3.112,"hi":3.578,"ng":25391,"nk":564,"sg":0.0458,"sk":0.0045,"src":"Zirconium","top":"Australia","ts":0.333,"cn":0.067,"hhi":1777,"px":true,"f":["eu","us"],"rt":7.143,"rtlo":4.099,"rthi":11.99},"Ta":{"z":73,"name":"Tantalum","row":6,"col":5,"lg":1.378,"lo":1.231,"hi":1.538,"ng":18656,"nk":789,"sg":0.0337,"sk":0.0129,"src":"Tantalum","top":"Congo (Kinshasa)","ts":0.419,"cn":0.036,"hhi":2510,"px":false,"f":["eu","us"],"rt":3.498,"rtlo":2.054,"rthi":6.446},"W":{"z":74,"name":"Tungsten","row":6,"col":6,"lg":0.429,"lo":0.28,"hi":0.59,"ng":14044,"nk":772,"sg":0.0254,"sk":0.0188,"src":"Tungsten","top":"China","ts":0.823,"cn":0.823,"hhi":6812,"px":false,"f":["eu","us"],"rt":2.537,"rtlo":1.659,"rthi":3.54},"Re":{"z":75,"name":"Rhenium","row":6,"col":7,"lg":1.671,"lo":1.496,"hi":1.884,"ng":18302,"nk":575,"sg":0.033,"sk":0.0104,"src":"Rhenium","top":"Chile","ts":0.468,"cn":0.085,"hhi":2815,"px":false,"f":[],"rt":3.835,"rtlo":2.283,"rthi":5.939},"Os":{"z":76,"name":"Osmium","row":6,"col":8,"lg":2.948,"lo":2.751,"hi":3.189,"ng":35924,"nk":492,"sg":0.0648,"sk":0.0084,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","pgm"],"rt":8.705,"rtlo":5.233,"rthi":13.946},"Ir":{"z":77,"name":"Iridium","row":6,"col":9,"lg":3.77,"lo":3.615,"hi":3.965,"ng":73358,"nk":849,"sg":0.1324,"sk":0.0097,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":true,"f":["eu","us","pgm"],"rt":2.035,"rtlo":1.508,"rthi":2.977},"Pt":{"z":78,"name":"Platinum","row":6,"col":10,"lg":2.92,"lo":2.753,"hi":3.081,"ng":53316,"nk":1194,"sg":0.0962,"sk":0.0127,"src":"Platinum","top":"South Africa","ts":0.706,"cn":0.0,"hhi":5230,"px":false,"f":["eu","us","pgm"],"rt":4.383,"rtlo":2.901,"rthi":7.459},"Au":{"z":79,"name":"Gold","row":6,"col":11,"lg":2.035,"lo":1.874,"hi":2.196,"ng":21011,"nk":968,"sg":0.0379,"sk":0.0092,"src":"Gold","top":"China","ts":0.115,"cn":0.115,"hhi":465,"px":false,"f":[],"rt":3.151,"rtlo":2.04,"rthi":5.148},"Hg":{"z":80,"name":"Mercury","row":6,"col":12,"lg":0.693,"lo":0.574,"hi":0.846,"ng":18603,"nk":859,"sg":0.0336,"sk":0.0208,"src":"Mercury","top":"China","ts":0.833,"cn":0.833,"hhi":7023,"px":false,"f":[],"rt":4.184,"rtlo":3.771,"rthi":4.654},"Tl":{"z":81,"name":"Thallium","row":6,"col":13,"lg":-0.657,"lo":-0.783,"hi":-0.511,"ng":6866,"nk":1039,"sg":0.0124,"sk":0.0195,"f":[],"rt":0.595,"rtlo":0.381,"rthi":1.055},"Pb":{"z":82,"name":"Lead","row":6,"col":14,"lg":0.035,"lo":-0.076,"hi":0.14,"ng":18027,"nk":1323,"sg":0.0325,"sk":0.0318,"src":"Lead","top":"China","ts":0.438,"cn":0.438,"hhi":2180,"px":false,"f":[],"rt":2.716,"rtlo":2.009,"rthi":3.389},"Bi":{"z":83,"name":"Bismuth","row":6,"col":15,"lg":0.974,"lo":0.853,"hi":1.087,"ng":28200,"nk":1297,"sg":0.0509,"sk":0.0259,"src":"Bismuth","top":"China","ts":0.812,"cn":0.812,"hhi":6699,"px":false,"f":["eu","us"],"rt":2.587,"rtlo":1.79,"rthi":4.047},"Po":{"z":84,"name":"Polonium","row":6,"col":16,"f":["rad"]},"At":{"z":85,"name":"Astatine","row":6,"col":17,"f":["rad"]},"Rn":{"z":86,"name":"Radon","row":6,"col":18,"f":["rad"]},"Fr":{"z":87,"name":"Francium","row":7,"col":1,"f":["rad"]},"Ra":{"z":88,"name":"Radium","row":7,"col":2,"f":["rad"]},"Ac":{"z":89,"name":"Actinium","row":10,"col":3,"lg":9.339,"lo":8.599,"hi":10.321,"ng":7725,"nk":7,"sg":0.0139,"sk":0.0,"f":["rad"],"rt":901.324,"rtlo":550.128,"rthi":1605.08},"Th":{"z":90,"name":"Thorium","row":10,"col":4,"lg":3.027,"lo":2.818,"hi":3.31,"ng":24559,"nk":498,"sg":0.0443,"sk":0.0054,"f":["rad"],"rt":4.667,"rtlo":2.513,"rthi":13.793},"Pa":{"z":91,"name":"Protactinium","row":10,"col":5,"lg":7.773,"lo":6.64,"hi":9.1,"ng":12575,"nk":33,"sg":0.0227,"sk":0.0001,"f":["rad"],"rt":366.984,"rtlo":218.682,"rthi":667.214},"U":{"z":92,"name":"Uranium","row":10,"col":6,"lg":-1.015,"lo":-1.134,"hi":-0.891,"ng":7991,"nk":1358,"sg":0.0144,"sk":0.0291,"f":["rad"],"rt":0.596,"rtlo":0.419,"rthi":0.927},"Np":{"z":93,"name":"Neptunium","row":10,"col":7,"lg":1.163,"lo":0.824,"hi":1.556,"ng":4166,"nk":220,"sg":0.0075,"sk":0.0034,"f":["rad"],"rt":6.575,"rtlo":5.465,"rthi":8.076},"Pu":{"z":94,"name":"Plutonium","row":10,"col":8,"lg":1.361,"lo":0.958,"hi":1.813,"ng":2754,"nk":239,"sg":0.005,"sk":0.0019,"f":["rad"],"rt":4.869,"rtlo":3.999,"rthi":6.013},"Am":{"z":95,"name":"Americium","row":10,"col":9,"f":["rad"]},"Cm":{"z":96,"name":"Curium","row":10,"col":10,"f":["rad"]},"Bk":{"z":97,"name":"Berkelium","row":10,"col":11,"f":["rad"]},"Cf":{"z":98,"name":"Californium","row":10,"col":12,"f":["rad"]},"Es":{"z":99,"name":"Einsteinium","row":10,"col":13,"f":["rad"]},"Fm":{"z":100,"name":"Fermium","row":10,"col":14,"f":["rad"]},"Md":{"z":101,"name":"Mendelevium","row":10,"col":15,"f":["rad"]},"No":{"z":102,"name":"Nobelium","row":10,"col":16,"f":["rad"]},"Lr":{"z":103,"name":"Lawrencium","row":10,"col":17,"f":["rad"]}},"main":{"MP_known":[{"m":"crm_eu_atom","g":0.5902,"k":0.5155,"d":0.0747,"lo":0.0553,"hi":0.0941},{"m":"crm_us_atom","g":0.6069,"k":0.4389,"d":0.168,"lo":0.149,"hi":0.187},{"m":"has_ree","g":0.7193,"k":0.4515,"d":0.2678,"lo":0.2338,"hi":0.3019},{"m":"has_f_in_core","g":0.597,"k":0.2707,"d":0.3263,"lo":0.2938,"hi":0.3588},{"m":"has_pgm","g":0.4136,"k":0.1873,"d":0.2263,"lo":0.197,"hi":0.2555},{"m":"hhi_p","g":4808.1322,"k":3171.1204,"d":1637.0118,"lo":1562.7894,"hi":1711.2343}],"MP_theoretical":[{"m":"crm_eu_atom","g":0.5902,"k":0.5172,"d":0.0729,"lo":0.0617,"hi":0.0842},{"m":"crm_us_atom","g":0.6069,"k":0.497,"d":0.1099,"lo":0.0981,"hi":0.1217},{"m":"has_ree","g":0.7193,"k":0.4604,"d":0.2589,"lo":0.2395,"hi":0.2783},{"m":"has_f_in_core","g":0.597,"k":0.2411,"d":0.3559,"lo":0.3375,"hi":0.3744},{"m":"has_pgm","g":0.4136,"k":0.1812,"d":0.2323,"lo":0.2151,"hi":0.2496},{"m":"hhi_p","g":4808.1322,"k":3207.2311,"d":1600.9011,"lo":1555.0203,"hi":1646.7819}],"EXT_CODED":[{"m":"crm_eu_atom","g":0.6268,"k":0.5508,"d":0.076,"lo":0.0693,"hi":0.0827},{"m":"crm_us_atom","g":0.6252,"k":0.6004,"d":0.0248,"lo":0.0167,"hi":0.0328},{"m":"has_ree","g":0.768,"k":0.6682,"d":0.0999,"lo":0.0895,"hi":0.1103},{"m":"has_f_in_core","g":0.6605,"k":0.5099,"d":0.1506,"lo":0.1365,"hi":0.1647},{"m":"has_pgm","g":0.4657,"k":0.453,"d":0.0128,"lo":-0.0035,"hi":0.0291},{"m":"hhi_p","g":4924.6752,"k":4179.9907,"d":744.6845,"lo":714.6936,"hi":774.6754}]},"cov":{"MP_known":0.7258,"MP_theoretical":0.7258,"EXT_CODED":1.0},"dec":[{"m":"crm_eu_atom","gap":0.2534,"mix":0.1788,"within":0.0747,"share":0.7053,"ci":[0.631,0.776]},{"m":"crm_us_atom","gap":0.2674,"mix":0.0994,"within":0.168,"share":0.3718,"ci":[0.304,0.439]},{"m":"has_ree","gap":0.4146,"mix":0.1468,"within":0.2678,"share":0.3541,"ci":[0.281,0.428]},{"m":"has_f_in_core","gap":0.4185,"mix":0.0922,"within":0.3263,"share":0.2203,"ci":[0.14,0.307]},{"m":"has_pgm","gap":0.2937,"mix":0.0674,"within":0.2263,"share":0.2295,"ci":[0.126,0.314]},{"m":"hhi_p","gap":2047.9867,"mix":410.9749,"within":1637.0118,"share":0.2007,"ci":[0.162,0.239]}],"uni":[{"fam":"rare earths","grp":"GNoME","obs":0.768,"exp":0.6183,"ratio":1.2422},{"fam":"rare earths","grp":"MP_known","obs":0.3034,"exp":0.5177,"ratio":0.5861},{"fam":"rare earths","grp":"MP_theoretical","obs":0.2472,"exp":0.5468,"ratio":0.4521},{"fam":"rare earths","grp":"EXT_MP","obs":0.4564,"exp":0.5014,"ratio":0.9102},{"fam":"rare earths","grp":"EXT_CODED","obs":0.4374,"exp":0.5238,"ratio":0.835},{"fam":"f-in-core lanthanides","grp":"GNoME","obs":0.6605,"exp":0.4512,"ratio":1.4637},{"fam":"f-in-core lanthanides","grp":"MP_known","obs":0.1778,"exp":0.3674,"ratio":0.4841},{"fam":"f-in-core lanthanides","grp":"MP_theoretical","obs":0.127,"exp":0.3916,"ratio":0.3244},{"fam":"f-in-core lanthanides","grp":"EXT_MP","obs":0.2897,"exp":0.3525,"ratio":0.8217},{"fam":"f-in-core lanthanides","grp":"EXT_CODED","obs":0.2784,"exp":0.3708,"ratio":0.7509},{"fam":"Pt-group metals","grp":"GNoME","obs":0.4657,"exp":0.2723,"ratio":1.7107},{"fam":"Pt-group metals","grp":"MP_known","obs":0.119,"exp":0.2165,"ratio":0.5499},{"fam":"Pt-group metals","grp":"MP_theoretical","obs":0.0696,"exp":0.2326,"ratio":0.299},{"fam":"Pt-group metals","grp":"EXT_MP","obs":0.2157,"exp":0.2059,"ratio":1.0473},{"fam":"Pt-group metals","grp":"EXT_CODED","obs":0.2377,"exp":0.2178,"ratio":1.091},{"fam":"EU critical","grp":"GNoME","obs":0.9783,"exp":0.9587,"ratio":1.0205},{"fam":"EU critical","grp":"MP_known","obs":0.8033,"exp":0.9011,"ratio":0.8914},{"fam":"EU critical","grp":"MP_theoretical","obs":0.8862,"exp":0.9185,"ratio":0.9648},{"fam":"EU critical","grp":"EXT_MP","obs":0.9021,"exp":0.8973,"ratio":1.0053},{"fam":"EU critical","grp":"EXT_CODED","obs":0.8748,"exp":0.9119,"ratio":0.9593}],"marg":{"has_f_in_core":{"yes":0.6184,"no":0.4503,"medy":18.6,"medn":28.5,"orr":1.8278,"lo":1.8063,"hi":1.8495},"has_ree":{"yes":0.5956,"no":0.4479,"medy":19.7,"medn":28.9,"orr":1.6164,"lo":1.5953,"hi":1.6378},"has_u_element":{"yes":0.579,"no":0.5539,"medy":20.5,"medn":21.7,"orr":1.0706,"lo":1.058,"hi":1.0834}},"margOQ":{"has_f_in_core":{"yes":0.7372,"no":0.6079,"medy":13.2,"medn":18.4,"orr":1.7051,"lo":1.684,"hi":1.7264},"has_ree":{"yes":0.7218,"no":0.5989,"medy":13.8,"medn":18.7,"orr":1.5873,"lo":1.5658,"hi":1.6092},"has_u_element":{"yes":0.6985,"no":0.6911,"medy":14.7,"medn":14.7,"orr":1.0071,"lo":0.9943,"hi":1.02}},"eg":[{"app":"cathode","sub":"all","n":15533,"m":"crm_eu_atom","s":0.4284,"k":0.1952},{"app":"cathode","sub":"all","n":15533,"m":"crm_us_atom","s":0.4947,"k":0.1732},{"app":"cathode","sub":"all","n":15533,"m":"has_ree","s":0.558,"k":0.2179},{"app":"cathode","sub":"all","n":15533,"m":"has_f_in_core","s":0.4138,"k":0.1141},{"app":"cathode","sub":"all","n":15533,"m":"has_pgm","s":0.3404,"k":0.0655},{"app":"cathode","sub":"all","n":15533,"m":"hhi_p","s":4078.8384,"k":1875.6138},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"crm_eu_atom","s":0.2626,"k":0.2023},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"crm_us_atom","s":0.3692,"k":0.181},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_ree","s":0.4107,"k":0.2237},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_f_in_core","s":0.2738,"k":0.1181},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"has_pgm","s":0.1592,"k":0.0678},{"app":"cathode","sub":"confidence>=0.9","n":3448,"m":"hhi_p","s":3280.0753,"k":1916.5907},{"app":"perovskite","sub":"all","n":2852,"m":"crm_eu_atom","s":0.2668,"k":0.1773},{"app":"perovskite","sub":"all","n":2852,"m":"crm_us_atom","s":0.2972,"k":0.1546},{"app":"perovskite","sub":"all","n":2852,"m":"has_ree","s":0.5957,"k":0.2008},{"app":"perovskite","sub":"all","n":2852,"m":"has_f_in_core","s":0.4681,"k":0.1033},{"app":"perovskite","sub":"all","n":2852,"m":"has_pgm","s":0.2146,"k":0.0623},{"app":"perovskite","sub":"all","n":2852,"m":"hhi_p","s":2916.7697,"k":1776.0053},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"crm_eu_atom","s":0.2688,"k":0.169},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"crm_us_atom","s":0.2791,"k":0.1455},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_ree","s":0.628,"k":0.1939},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_f_in_core","s":0.4641,"k":0.0985},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"has_pgm","s":0.227,"k":0.0596},{"app":"perovskite","sub":"confidence>=0.9","n":1476,"m":"hhi_p","s":2472.2016,"k":1727.5306},{"app":"thermoelectric","sub":"all","n":9056,"m":"crm_eu_atom","s":0.6217,"k":0.2103},{"app":"thermoelectric","sub":"all","n":9056,"m":"crm_us_atom","s":0.8218,"k":0.1893},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_ree","s":0.5205,"k":0.2314},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_f_in_core","s":0.4007,"k":0.1229},{"app":"thermoelectric","sub":"all","n":9056,"m":"has_pgm","s":0.2413,"k":0.0687},{"app":"thermoelectric","sub":"all","n":9056,"m":"hhi_p","s":4580.8152,"k":1961.1321},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"crm_eu_atom","s":0.5643,"k":0.2258},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"crm_us_atom","s":0.7739,"k":0.2065},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_ree","s":0.3015,"k":0.2443},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_f_in_core","s":0.1826,"k":0.1317},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"has_pgm","s":0.3186,"k":0.0741},{"app":"thermoelectric","sub":"confidence>=0.9","n":2169,"m":"hhi_p","s":4410.5029,"k":2051.8597}],"alt":[{"app":"cathode","sub":"Al","n":5117,"hr":0.7471,"a1":1.0,"ma":67.0,"ph":18.053,"pl":28.7009,"p":0.0},{"app":"cathode","sub":"Ca","n":878,"hr":0.0091,"a1":1.0,"ma":17.0,"ph":25.1893,"pl":214.5384,"p":0.0207},{"app":"cathode","sub":"Cs","n":3288,"hr":0.1271,"a1":1.0,"ma":133.0,"ph":48.0095,"pl":45.9802,"p":0.1375},{"app":"cathode","sub":"K","n":887,"hr":0.2638,"a1":1.0,"ma":18.0,"ph":26.4241,"pl":107.3825,"p":0.0},{"app":"cathode","sub":"Li","n":308,"hr":0.0747,"a1":0.9565,"ma":9.0,"ph":441.6945,"pl":185.939,"p":0.0036},{"app":"cathode","sub":"Mg","n":735,"hr":0.4762,"a1":0.9257,"ma":7.0,"ph":26.7423,"pl":86.5412,"p":0.0},{"app":"cathode","sub":"Na","n":514,"hr":0.2276,"a1":0.9829,"ma":17.0,"ph":37.886,"pl":58.26,"p":0.0},{"app":"cathode","sub":"Rb","n":2480,"hr":0.0996,"a1":1.0,"ma":75.0,"ph":13.8726,"pl":18.8087,"p":0.0021},{"app":"cathode","sub":"Y","n":1774,"hr":0.27,"a1":1.0,"ma":31.0,"ph":38.7746,"pl":116.2719,"p":0.0},{"app":"perovskite","sub":"mixed","n":2823,"hr":0.0255,"a1":1.0,"ma":310.0,"ph":-1.2274,"pl":-0.9921,"p":0.0},{"app":"perovskite","sub":"pure","n":2823,"hr":0.0255,"a1":1.0,"ma":509.5,"ph":-0.4869,"pl":-0.3593,"p":0.0006},{"app":"thermoelectric","sub":"300K","n":8178,"hr":0.5995,"a1":0.9986,"ma":301.0,"ph":0.1127,"pl":0.1681,"p":0.0},{"app":"thermoelectric","sub":"430K","n":5431,"hr":0.5999,"a1":0.9979,"ma":281.0,"ph":0.2257,"pl":0.2782,"p":0.0},{"app":"thermoelectric","sub":"560K","n":4919,"hr":0.5959,"a1":0.9962,"ma":342.0,"ph":0.3889,"pl":0.4519,"p":0.0},{"app":"thermoelectric","sub":"690K","n":6019,"hr":0.6086,"a1":0.9992,"ma":530.0,"ph":0.508,"pl":0.5495,"p":0.0},{"app":"thermoelectric","sub":"820K","n":4356,"hr":0.5854,"a1":0.9992,"ma":432.5,"ph":0.6112,"pl":0.6974,"p":0.0},{"app":"thermoelectric","sub":"950K","n":3986,"hr":0.5873,"a1":0.9987,"ma":438.0,"ph":0.6847,"pl":0.7853,"p":0.0}],"prof":[{"c":"China","g":0.4033,"k":0.3758},{"c":"South Africa","g":0.1063,"k":0.052},{"c":"Australia","g":0.0403,"k":0.0681},{"c":"Turkey","g":0.0241,"k":0.0366},{"c":"Congo (Kinshasa)","g":0.0266,"k":0.0238},{"c":"Russia","g":0.0449,"k":0.0419},{"c":"United States","g":0.0502,"k":0.031},{"c":"Indonesia","g":0.0205,"k":0.031},{"c":"Brazil","g":0.0184,"k":0.0323},{"c":"Guinea","g":0.0104,"k":0.0361},{"c":"Other Countries","g":0.0208,"k":0.0233},{"c":"India","g":0.0127,"k":0.0266}],"cc":{"hhi_new":{"g":4173.9208,"k":3722.8413,"lo":365.6289,"hi":536.5301},"china_frac":{"g":0.4029,"k":0.3421,"lo":0.0512,"hi":0.0705},"conc_frac":{"g":0.6587,"k":0.5266,"lo":0.1075,"hi":0.1567},"top_share_max":{"g":0.73,"k":0.7142,"lo":0.0064,"hi":0.0252}},"big":[{"st":"4_intermetallic","grp":"EXT_CODED","ree":0.7126,"f4":0.5109,"eu":0.6465,"n":4314},{"st":"4_intermetallic","grp":"GNoME","ree":0.8016,"f4":0.6751,"eu":0.7248,"n":232824},{"st":"4_intermetallic","grp":"MP_known","ree":0.558,"f4":0.3406,"eu":0.6685,"n":276},{"st":"4_intermetallic","grp":"MP_theoretical","ree":0.6002,"f4":0.3164,"eu":0.6228,"n":828},{"st":"5_intermetallic","grp":"EXT_CODED","ree":0.9273,"f4":0.8218,"eu":0.6446,"n":275},{"st":"5_intermetallic","grp":"GNoME","ree":0.8971,"f4":0.8284,"eu":0.7238,"n":151902},{"st":"5_intermetallic","grp":"MP_known","ree":1.0,"f4":0.5,"eu":0.3125,"n":2},{"st":"5_intermetallic","grp":"MP_theoretical","ree":0.5625,"f4":0.4062,"eu":0.7914,"n":32}],"null":{"A":0.04,"family":0.06,"B":0.07,"C":0.06},"dec2":[{"m":"crm_eu_atom","gap":0.2534,"a":0.7053,"b":0.7854,"avg":0.7453},{"m":"has_ree","gap":0.4146,"a":0.3541,"b":0.4856,"avg":0.4198},{"m":"has_f_in_core","gap":0.4185,"a":0.2203,"b":0.4748,"avg":0.3476},{"m":"has_pgm","gap":0.2937,"a":0.2295,"b":0.6124,"avg":0.421}],"clGap":[{"m":"crm_eu_atom","cl":"ln_template","d":0.0747,"lo":0.0456,"hi":0.108},{"m":"has_ree","cl":"ln_template","d":0.2678,"lo":0.2152,"hi":0.3278},{"m":"has_f_in_core","cl":"ln_template","d":0.3263,"lo":0.2797,"hi":0.3805},{"m":"has_pgm","cl":"ln_template","d":0.2263,"lo":0.1729,"hi":0.2745},{"m":"crm_eu_atom","cl":"family","d":0.0747,"lo":0.0334,"hi":0.1174},{"m":"has_ree","cl":"family","d":0.2678,"lo":0.2066,"hi":0.342},{"m":"has_f_in_core","cl":"family","d":0.3263,"lo":0.2718,"hi":0.3918},{"m":"has_pgm","cl":"family","d":0.2263,"lo":0.1486,"hi":0.2976}],"clOR":[{"f":"has_f_in_core","h":"e_decomp_mp","cl":"ln_template","o":1.828,"lo":1.786,"hi":1.874},{"f":"has_f_in_core","h":"e_decomp_mp_oqmd","cl":"ln_template","o":1.705,"lo":1.663,"hi":1.748},{"f":"has_ree","h":"e_decomp_mp","cl":"ln_template","o":1.616,"lo":1.578,"hi":1.655},{"f":"has_ree","h":"e_decomp_mp_oqmd","cl":"ln_template","o":1.587,"lo":1.548,"hi":1.625},{"f":"has_f_in_core","h":"e_decomp_mp","cl":"family","o":1.828,"lo":1.673,"hi":1.997},{"f":"has_f_in_core","h":"e_decomp_mp_oqmd","cl":"family","o":1.705,"lo":1.575,"hi":1.844},{"f":"has_ree","h":"e_decomp_mp","cl":"family","o":1.616,"lo":1.489,"hi":1.745},{"f":"has_ree","h":"e_decomp_mp_oqmd","cl":"family","o":1.587,"lo":1.477,"hi":1.703}],"egT":[{"app":"cathode","sub":"all","m":"crm_eu_atom","s":0.3871,"k":0.3388,"lo":0.0373,"hi":0.0592,"cov":0.862},{"app":"cathode","sub":"all","m":"has_ree","s":0.5312,"k":0.3209,"lo":0.191,"hi":0.2297,"cov":0.862},{"app":"cathode","sub":"all","m":"has_f_in_core","s":0.3867,"k":0.1835,"lo":0.1847,"hi":0.2216,"cov":0.862},{"app":"cathode","sub":"all","m":"has_pgm","s":0.3049,"k":0.1194,"lo":0.1688,"hi":0.2022,"cov":0.862},{"app":"cathode","sub":"conf","m":"crm_eu_atom","s":0.2534,"k":0.2075,"lo":0.0388,"hi":0.053,"cov":0.967},{"app":"cathode","sub":"conf","m":"has_ree","s":0.4133,"k":0.2247,"lo":0.1709,"hi":0.2063,"cov":0.967},{"app":"cathode","sub":"conf","m":"has_f_in_core","s":0.2735,"k":0.1195,"lo":0.1382,"hi":0.1699,"cov":0.967},{"app":"cathode","sub":"conf","m":"has_pgm","s":0.1575,"k":0.0691,"lo":0.0754,"hi":0.1013,"cov":0.967},{"app":"perovskite","sub":"all","m":"crm_eu_atom","s":0.2663,"k":0.1722,"lo":0.0884,"hi":0.0999,"cov":0.999},{"app":"perovskite","sub":"all","m":"has_ree","s":0.5963,"k":0.1937,"lo":0.3838,"hi":0.4214,"cov":0.999},{"app":"perovskite","sub":"all","m":"has_f_in_core","s":0.4686,"k":0.0998,"lo":0.35,"hi":0.3875,"cov":0.999},{"app":"perovskite","sub":"all","m":"has_pgm","s":0.2148,"k":0.0622,"lo":0.1372,"hi":0.1681,"cov":0.999},{"app":"perovskite","sub":"conf","m":"crm_eu_atom","s":0.2679,"k":0.1626,"lo":0.0986,"hi":0.1119,"cov":0.999},{"app":"perovskite","sub":"conf","m":"has_ree","s":0.6289,"k":0.1859,"lo":0.4177,"hi":0.4682,"cov":0.999},{"app":"perovskite","sub":"conf","m":"has_f_in_core","s":0.4647,"k":0.0947,"lo":0.3442,"hi":0.3958,"cov":0.999},{"app":"perovskite","sub":"conf","m":"has_pgm","s":0.2273,"k":0.0596,"lo":0.1459,"hi":0.1893,"cov":0.999},{"app":"thermoelectric","sub":"all","m":"crm_eu_atom","s":0.6247,"k":0.557,"lo":0.0444,"hi":0.0911,"cov":0.804},{"app":"thermoelectric","sub":"all","m":"has_ree","s":0.4986,"k":0.4818,"lo":-0.0239,"hi":0.0574,"cov":0.804},{"app":"thermoelectric","sub":"all","m":"has_f_in_core","s":0.3768,"k":0.2907,"lo":0.0472,"hi":0.1249,"cov":0.804},{"app":"thermoelectric","sub":"all","m":"has_pgm","s":0.2367,"k":0.2006,"lo":0.0012,"hi":0.071,"cov":0.804},{"app":"thermoelectric","sub":"conf","m":"crm_eu_atom","s":0.5496,"k":0.4877,"lo":0.0396,"hi":0.0842,"cov":0.861},{"app":"thermoelectric","sub":"conf","m":"has_ree","s":0.2871,"k":0.4317,"lo":-0.1816,"hi":-0.1076,"cov":0.861},{"app":"thermoelectric","sub":"conf","m":"has_f_in_core","s":0.1719,"k":0.2574,"lo":-0.1195,"hi":-0.0515,"cov":0.861},{"app":"thermoelectric","sub":"conf","m":"has_pgm","s":0.3091,"k":0.1736,"lo":0.1018,"hi":0.1692,"cov":0.861}],"altS":[{"app":"cathode","sub":"Al","conf":0.5,"same":false,"n":3823,"a1":1.0,"ma":67.0},{"app":"cathode","sub":"Ca","conf":0.5,"same":false,"n":8,"a1":1.0,"ma":17.0},{"app":"cathode","sub":"Cs","conf":0.5,"same":false,"n":418,"a1":1.0,"ma":133.0},{"app":"cathode","sub":"K","conf":0.5,"same":false,"n":234,"a1":1.0,"ma":18.0},{"app":"cathode","sub":"Li","conf":0.5,"same":false,"n":23,"a1":0.957,"ma":9.0},{"app":"cathode","sub":"Mg","conf":0.5,"same":false,"n":350,"a1":0.926,"ma":7.0},{"app":"cathode","sub":"Na","conf":0.5,"same":false,"n":117,"a1":0.983,"ma":17.0},{"app":"cathode","sub":"Rb","conf":0.5,"same":false,"n":247,"a1":1.0,"ma":75.0},{"app":"cathode","sub":"Y","conf":0.5,"same":false,"n":479,"a1":1.0,"ma":31.0},{"app":"perovskite","sub":"mixed","conf":0.5,"same":false,"n":72,"a1":1.0,"ma":310.0},{"app":"perovskite","sub":"pure","conf":0.5,"same":false,"n":72,"a1":1.0,"ma":509.5},{"app":"thermoelectric","sub":"300K","conf":0.5,"same":false,"n":4903,"a1":0.999,"ma":301.0},{"app":"thermoelectric","sub":"430K","conf":0.5,"same":false,"n":3258,"a1":0.998,"ma":281.0},{"app":"thermoelectric","sub":"560K","conf":0.5,"same":false,"n":2931,"a1":0.996,"ma":342.0},{"app":"thermoelectric","sub":"690K","conf":0.5,"same":false,"n":3663,"a1":0.999,"ma":530.0},{"app":"thermoelectric","sub":"820K","conf":0.5,"same":false,"n":2550,"a1":0.999,"ma":432.5},{"app":"thermoelectric","sub":"950K","conf":0.5,"same":false,"n":2341,"a1":0.999,"ma":438.0},{"app":"cathode","sub":"Al","conf":0.5,"same":true,"n":3823,"a1":0.957,"ma":21.0},{"app":"cathode","sub":"Ca","conf":0.5,"same":true,"n":8,"a1":0.25,"ma":0.0},{"app":"cathode","sub":"Cs","conf":0.5,"same":true,"n":418,"a1":0.608,"ma":1.0},{"app":"cathode","sub":"K","conf":0.5,"same":true,"n":234,"a1":0.44,"ma":0.0},{"app":"cathode","sub":"Li","conf":0.5,"same":true,"n":23,"a1":0.739,"ma":1.0},{"app":"cathode","sub":"Mg","conf":0.5,"same":true,"n":350,"a1":0.349,"ma":0.0},{"app":"cathode","sub":"Na","conf":0.5,"same":true,"n":117,"a1":0.59,"ma":1.0},{"app":"cathode","sub":"Rb","conf":0.5,"same":true,"n":247,"a1":0.765,"ma":3.0},{"app":"cathode","sub":"Y","conf":0.5,"same":true,"n":479,"a1":0.63,"ma":1.0},{"app":"perovskite","sub":"mixed","conf":0.5,"same":true,"n":72,"a1":0.958,"ma":15.0},{"app":"perovskite","sub":"pure","conf":0.5,"same":true,"n":72,"a1":0.903,"ma":21.5},{"app":"thermoelectric","sub":"300K","conf":0.5,"same":true,"n":4903,"a1":0.978,"ma":69.0},{"app":"thermoelectric","sub":"430K","conf":0.5,"same":true,"n":3258,"a1":0.981,"ma":65.0},{"app":"thermoelectric","sub":"560K","conf":0.5,"same":true,"n":2931,"a1":0.975,"ma":70.0},{"app":"thermoelectric","sub":"690K","conf":0.5,"same":true,"n":3663,"a1":0.985,"ma":141.0},{"app":"thermoelectric","sub":"820K","conf":0.5,"same":true,"n":2550,"a1":0.982,"ma":110.0},{"app":"thermoelectric","sub":"950K","conf":0.5,"same":true,"n":2341,"a1":0.973,"ma":103.0},{"app":"cathode","sub":"Al","conf":0.9,"same":false,"n":78,"a1":0.577,"ma":1.5},{"app":"cathode","sub":"Cs","conf":0.9,"same":false,"n":8,"a1":1.0,"ma":54.0},{"app":"cathode","sub":"K","conf":0.9,"same":false,"n":25,"a1":0.88,"ma":3.0},{"app":"cathode","sub":"Mg","conf":0.9,"same":false,"n":4,"a1":1.0,"ma":2.5},{"app":"cathode","sub":"Na","conf":0.9,"same":false,"n":1,"a1":0.0,"ma":0.0},{"app":"cathode","sub":"Rb","conf":0.9,"same":false,"n":138,"a1":1.0,"ma":27.0},{"app":"cathode","sub":"Y","conf":0.9,"same":false,"n":28,"a1":0.964,"ma":7.5},{"app":"perovskite","sub":"mixed","conf":0.9,"same":false,"n":16,"a1":1.0,"ma":151.0},{"app":"perovskite","sub":"pure","conf":0.9,"same":false,"n":16,"a1":1.0,"ma":208.5},{"app":"thermoelectric","sub":"300K","conf":0.9,"same":false,"n":1048,"a1":0.989,"ma":79.5},{"app":"thermoelectric","sub":"430K","conf":0.9,"same":false,"n":687,"a1":0.978,"ma":47.0},{"app":"thermoelectric","sub":"560K","conf":0.9,"same":false,"n":597,"a1":0.982,"ma":61.0},{"app":"thermoelectric","sub":"690K","conf":0.9,"same":false,"n":755,"a1":0.98,"ma":108.0},{"app":"thermoelectric","sub":"820K","conf":0.9,"same":false,"n":531,"a1":0.977,"ma":83.0},{"app":"thermoelectric","sub":"950K","conf":0.9,"same":false,"n":451,"a1":0.973,"ma":74.0},{"app":"cathode","sub":"Al","conf":0.9,"same":true,"n":78,"a1":0.308,"ma":0.0},{"app":"cathode","sub":"Cs","conf":0.9,"same":true,"n":8,"a1":0.25,"ma":0.0},{"app":"cathode","sub":"K","conf":0.9,"same":true,"n":25,"a1":0.0,"ma":0.0},{"app":"cathode","sub":"Mg","conf":0.9,"same":true,"n":4,"a1":0.0,"ma":0.0},{"app":"cathode","sub":"Na","conf":0.9,"same":true,"n":1,"a1":0.0,"ma":0.0},{"app":"cathode","sub":"Rb","conf":0.9,"same":true,"n":138,"a1":0.457,"ma":0.0},{"app":"cathode","sub":"Y","conf":0.9,"same":true,"n":28,"a1":0.357,"ma":0.0},{"app":"perovskite","sub":"mixed","conf":0.9,"same":true,"n":16,"a1":0.812,"ma":3.5},{"app":"perovskite","sub":"pure","conf":0.9,"same":true,"n":16,"a1":0.625,"ma":2.5},{"app":"thermoelectric","sub":"300K","conf":0.9,"same":true,"n":1048,"a1":0.925,"ma":14.0},{"app":"thermoelectric","sub":"430K","conf":0.9,"same":true,"n":687,"a1":0.889,"ma":8.0},{"app":"thermoelectric","sub":"560K","conf":0.9,"same":true,"n":597,"a1":0.921,"ma":9.0},{"app":"thermoelectric","sub":"690K","conf":0.9,"same":true,"n":755,"a1":0.943,"ma":19.0},{"app":"thermoelectric","sub":"820K","conf":0.9,"same":true,"n":531,"a1":0.91,"ma":10.0},{"app":"thermoelectric","sub":"950K","conf":0.9,"same":true,"n":451,"a1":0.867,"ma":10.0}],"cut":[{"v":"known >= 100 per type","cov":0.726,"m":"crm_eu_atom","d":0.0747,"lo":0.0553,"hi":0.0941},{"v":"known >= 100 per type","cov":0.726,"m":"has_ree","d":0.2678,"lo":0.2338,"hi":0.3019},{"v":"known >= 100 per type","cov":0.726,"m":"has_f_in_core","d":0.3263,"lo":0.2938,"hi":0.3588},{"v":"known >= 100 per type","cov":0.726,"m":"has_pgm","d":0.2263,"lo":0.197,"hi":0.2555},{"v":"known >= 300 per type","cov":0.306,"m":"crm_eu_atom","d":0.0999,"lo":0.0975,"hi":0.1024},{"v":"known >= 300 per type","cov":0.306,"m":"has_ree","d":0.3011,"lo":0.296,"hi":0.3061},{"v":"known >= 300 per type","cov":0.306,"m":"has_f_in_core","d":0.315,"lo":0.3105,"hi":0.3195},{"v":"known >= 300 per type","cov":0.306,"m":"has_pgm","d":0.1452,"lo":0.1414,"hi":0.149},{"v":"known >= 500 per type","cov":0.306,"m":"crm_eu_atom","d":0.0999,"lo":0.0975,"hi":0.1024},{"v":"known >= 500 per type","cov":0.306,"m":"has_ree","d":0.3011,"lo":0.296,"hi":0.3061},{"v":"known >= 500 per type","cov":0.306,"m":"has_f_in_core","d":0.315,"lo":0.3105,"hi":0.3195},{"v":"known >= 500 per type","cov":0.306,"m":"has_pgm","d":0.1452,"lo":0.1414,"hi":0.149},{"v":"known >= 1000 per type","cov":0.306,"m":"crm_eu_atom","d":0.0999,"lo":0.0975,"hi":0.1024},{"v":"known >= 1000 per type","cov":0.306,"m":"has_ree","d":0.3011,"lo":0.296,"hi":0.3061},{"v":"known >= 1000 per type","cov":0.306,"m":"has_f_in_core","d":0.315,"lo":0.3105,"hi":0.3195},{"v":"known >= 1000 per type","cov":0.306,"m":"has_pgm","d":0.1452,"lo":0.1414,"hi":0.149},{"v":"known >= 100, without 4-element metal-only","cov":0.306,"m":"crm_eu_atom","d":0.0999,"lo":0.0975,"hi":0.1024},{"v":"known >= 100, without 4-element metal-only","cov":0.306,"m":"has_ree","d":0.3011,"lo":0.296,"hi":0.3061},{"v":"known >= 100, without 4-element metal-only","cov":0.306,"m":"has_f_in_core","d":0.315,"lo":0.3105,"hi":0.3195},{"v":"known >= 100, without 4-element metal-only","cov":0.306,"m":"has_pgm","d":0.1452,"lo":0.1414,"hi":0.149}],"rob":[{"c":"common support (main)","cov":0.726,"m":"crm_eu_atom","d":0.0747,"lo":0.0553,"hi":0.0941},{"c":"common support (main)","cov":0.726,"m":"has_ree","d":0.2678,"lo":0.2338,"hi":0.3019},{"c":"common support (main)","cov":0.726,"m":"has_f_in_core","d":0.3263,"lo":0.2938,"hi":0.3588},{"c":"common support (main)","cov":0.726,"m":"has_pgm","d":0.2263,"lo":0.197,"hi":0.2555},{"c":"duplicates removed","cov":0.726,"m":"crm_eu_atom","d":0.0732,"lo":0.0538,"hi":0.0926},{"c":"duplicates removed","cov":0.726,"m":"has_ree","d":0.2668,"lo":0.2326,"hi":0.3009},{"c":"duplicates removed","cov":0.726,"m":"has_f_in_core","d":0.3264,"lo":0.2939,"hi":0.3589},{"c":"duplicates removed","cov":0.726,"m":"has_pgm","d":0.2254,"lo":0.1961,"hi":0.2548},{"c":"radioactive removed","cov":0.609,"m":"crm_eu_atom","d":0.0936,"lo":0.0744,"hi":0.1127},{"c":"radioactive removed","cov":0.609,"m":"has_ree","d":0.2792,"lo":0.2449,"hi":0.3136},{"c":"radioactive removed","cov":0.609,"m":"has_f_in_core","d":0.3474,"lo":0.3141,"hi":0.3807},{"c":"radioactive removed","cov":0.609,"m":"has_pgm","d":0.2398,"lo":0.2102,"hi":0.2694},{"c":"crystal system added (known >= 100 per cell)","cov":0.335,"m":"crm_eu_atom","d":0.0945,"lo":0.089,"hi":0.1001},{"c":"crystal system added (known >= 100 per cell)","cov":0.335,"m":"has_ree","d":0.2927,"lo":0.2815,"hi":0.3039},{"c":"crystal system added (known >= 100 per cell)","cov":0.335,"m":"has_f_in_core","d":0.3139,"lo":0.303,"hi":0.3247},{"c":"crystal system added (known >= 100 per cell)","cov":0.335,"m":"has_pgm","d":0.1448,"lo":0.1338,"hi":0.1558}],"dens":[{"flag":"has_f_in_core","measure":"median MP entries in chemical system (with / without)","value_with":86.0,"value_without":88.0,"ci_low":null,"ci_high":null},{"flag":"has_f_in_core","measure":"odds ratio, margin < 10 meV/atom, strata: type only (as in paper)","value_with":1.8068685054,"value_without":null,"ci_low":1.7813976224,"ci_high":1.8327035776},{"flag":"has_f_in_core","measure":"odds ratio, margin < 10 meV/atom, strata: type x MP-density quartile","value_with":1.8471670562,"value_without":null,"ci_low":1.8203491878,"ci_high":1.8743800125},{"flag":"has_f_in_core","measure":"odds ratio, margin < 25 meV/atom, strata: type only (as in paper)","value_with":1.8277530709,"value_without":null,"ci_low":1.8063022781,"ci_high":1.8494586032},{"flag":"has_f_in_core","measure":"odds ratio, margin < 25 meV/atom, strata: type x MP-density quartile","value_with":1.9107102189,"value_without":null,"ci_low":1.8876364533,"ci_high":1.9340660297},{"flag":"has_ree","measure":"median MP entries in chemical system (with / without)","value_with":85.0,"value_without":92.0,"ci_low":null,"ci_high":null},{"flag":"has_ree","measure":"odds ratio, margin < 10 meV/atom, strata: type only (as in paper)","value_with":1.5565223074,"value_without":null,"ci_low":1.5318023705,"ci_high":1.58164117},{"flag":"has_ree","measure":"odds ratio, margin < 10 meV/atom, strata: type x MP-density quartile","value_with":1.5933599804,"value_without":null,"ci_low":1.5673460186,"ci_high":1.6198057079},{"flag":"has_ree","measure":"odds ratio, margin < 25 meV/atom, strata: type only (as in paper)","value_with":1.6164071356,"value_without":null,"ci_low":1.5952513199,"ci_high":1.6378435144},{"flag":"has_ree","measure":"odds ratio, margin < 25 meV/atom, strata: type x MP-density quartile","value_with":1.6958484209,"value_without":null,"ci_low":1.6730563096,"ci_high":1.7189510301}]}</script>
 <script>
-(function () {
-  const D = JSON.parse(document.getElementById("data").textContent);
-  const $ = (id) => document.getElementById(id);
-  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const pct = (x, d = 0) => (100 * x).toFixed(d) + "%";
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+(function(){
+const D = JSON.parse(document.getElementById('data').textContent);
+const $ = s => document.querySelector(s);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const pct = (x, d=0) => (100*x).toFixed(d) + '%';
+const f2 = x => x.toFixed(2), f3 = x => x.toFixed(3);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MLAB = {has_ree:'Contains a rare earth', has_f_in_core:'Contains a frozen-4f lanthanide', has_pgm:'Contains a platinum-group metal', crm_eu_atom:'Share of atoms on the EU critical list', crm_us_atom:'Share of atoms on the US critical list'};
+const SHORT = {has_ree:'Rare earths', has_f_in_core:'Frozen-4f lanthanides', has_pgm:'Platinum-group metals', crm_eu_atom:'EU critical list', crm_us_atom:'US critical list'};
+const GLAB = {MP_known:'Known materials', MP_theoretical:'Computed MP entries', EXT_CODED:'Other databases', GNoME:'GNoME', EXT_MP:'External, MP IDs'};
+const GCOL = {GNoME:'--g', MP_known:'--k', MP_theoretical:'--c', EXT_CODED:'--o'};
+const wOf = id => Math.max(300, Math.round(document.getElementById(id).clientWidth));
+const S = {ref:'MP_known', pt:'n', dec:'a', hull:'mp', app:'cathode', egm:'n', rule:'base', el:'Tm'};
 
-  const MLAB = {
-    crm_eu_atom: "Atoms on the EU critical list", crm_us_atom: "Atoms on the US critical list",
-    has_ree: "Contains a rare earth", has_f_in_core: "Contains a frozen-4f lanthanide",
-    has_pgm: "Contains a platinum-group metal", hhi_p: "Supply concentration (HHI)"
+/* hint icon */
+const HINT = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5v7.2l-1.3-1.3a1.1 1.1 0 0 0-1.6 1.6l3.6 3.7c.6.6 1.4 1 2.3 1h1.8a3 3 0 0 0 3-3V6.9a1 1 0 0 0-2 0v-.6a1 1 0 0 0-2 0V6a1 1 0 0 0-2 0V1.5a1 1 0 0 0-2 0z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+document.querySelectorAll('.hint').forEach(h => h.innerHTML = h.innerHTML.replace('__HINT__', HINT));
+
+/* tooltip */
+const tip = $('#tip');
+function showTip(html, x, y){ tip.innerHTML = html; tip.classList.add('on'); const w = tip.offsetWidth, h = tip.offsetHeight; let L = x + 14, T = y + 14; if (L + w > innerWidth - 8) L = x - w - 14; if (T + h > innerHeight - 8) T = y - h - 14; tip.style.left = L + 'px'; tip.style.top = T + 'px'; }
+function hideTip(){ tip.classList.remove('on'); }
+function bindTips(root){
+  root.querySelectorAll('[data-tip]').forEach(n => {
+    n.addEventListener('mousemove', e => showTip(n.dataset.tip, e.clientX, e.clientY));
+    n.addEventListener('mouseleave', hideTip);
+    n.addEventListener('focus', () => { const r = n.getBoundingClientRect(); showTip(n.dataset.tip, r.right, r.top); });
+    n.addEventListener('blur', hideTip);
+    n.addEventListener('click', e => { const r = n.getBoundingClientRect(); showTip(n.dataset.tip, e.clientX || r.right, e.clientY || r.top); });
+  });
+}
+document.addEventListener('scroll', hideTip, {passive:true});
+
+/* segmented controls */
+document.querySelectorAll('.seg').forEach(seg => {
+  seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    S[seg.dataset.ctl] = b.dataset.v; render();
+  });
+});
+
+/* horizontal paired-bar chart */
+function pairBars(rows, opts){
+  const W = wOf(opts.id), compact = W < 560;
+  const labW = compact ? 0 : Math.min(opts.labW || 200, Math.round(W*0.36));
+  const lab0 = compact ? 18 : 0, rowH = compact ? 62 : 50, top = 6, plotW = W - labW - 64;
+  const max = opts.max || Math.max(...rows.flatMap(r => [r.a, r.b])) * 1.05;
+  const x = v => labW + (v / max) * plotW;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${top + rows.length*rowH + 24}" role="img" aria-label="${esc(opts.aria)}">`;
+  const ticks = opts.ticks || [0, .25, .5, .75, 1].filter(t => t <= max);
+  ticks.forEach(t => { s += `<line class="gridline" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${top + rows.length*rowH}"/><text class="lbl2" x="${x(t)}" y="${top + rows.length*rowH + 16}" text-anchor="middle">${opts.tickFmt ? opts.tickFmt(t) : pct(t)}</text>`; });
+  rows.forEach((r, i) => {
+    const y = top + i*rowH;
+    s += compact ? `<text class="lbl" x="0" y="${y + 13}">${esc(r.label)}</text>` : `<text class="lbl" x="0" y="${y + 26}">${esc(r.label)}</text>`;
+    [[r.a, opts.ca, 8 + lab0, r.tipA], [r.b, opts.cb, 26 + lab0, r.tipB]].forEach(([v, c, dy, t]) => {
+      const w = Math.max(2, x(v) - labW);
+      s += `<rect class="mark" tabindex="0" x="${labW}" y="${y + dy}" width="${w}" height="15" rx="4" fill="var(${c})" data-tip="${esc(t)}"/>`;
+      s += `<text class="val" x="${labW + w + 6}" y="${y + dy + 12}">${opts.fmt(v)}</text>`;
+    });
+  });
+  return s + '</svg>';
+}
+
+/* main result */
+function renderMain(){
+  const ref = S.ref, rows = D.main[ref].filter(r => MLAB[r.m]);
+  const order = ['has_ree','has_f_in_core','has_pgm','crm_eu_atom','crm_us_atom'];
+  const R = order.map(m => rows.find(r => r.m === m)).filter(Boolean).map(r => ({
+    label: SHORT[r.m], a: r.g, b: r.k,
+    tipA: `<b>GNoME</b><br>${MLAB[r.m]}: ${pct(r.g,1)}`,
+    tipB: `<b>${GLAB[ref]}</b> (matched)<br>${MLAB[r.m]}: ${pct(r.k,1)}<br>Gap ${r.d>0?'+':''}${f3(r.d)} (95% CI ${f3(r.lo)} to ${f3(r.hi)})`
+  }));
+  $('#leg-main').innerHTML = `<span><i class="sw" style="background:var(--g)"></i>GNoME</span><span><i class="sw" style="background:var(${GCOL[ref]})"></i>${GLAB[ref]}, matched</span>`;
+  $('#ch-main').innerHTML = pairBars(R, {id:'ch-main', labW:210, ca:'--g', cb:GCOL[ref], max:1, fmt:v => pct(v), aria:'GNoME versus ' + GLAB[ref]});
+  const cov = D.cov[ref];
+  $('#note-main').textContent = `Atom-share rows give the average share of a compound's atoms on each critical list. The comparison covers ${pct(cov,1)} of GNoME materials${cov < 1 ? ' (compound types with at least 100 reference compounds)' : ''}.`;
+  const g = r => rows.find(x => x.m === r);
+  const T = {
+    MP_known: `On the same compound types, 72% of GNoME materials contain a rare earth, against 45% of known materials, and 41% contain a platinum-group metal, against 19%.`,
+    MP_theoretical: `Computed-only Materials Project entries look like known materials, so the gap is not a general feature of computed data.`,
+    EXT_CODED: `Other computed databases are closer to GNoME. GNoME still contains rare earths more often (77% against 67%), but the platinum-group excess is shared with them.`
   };
-  const GLAB = { GNoME: "GNoME", MP_known: "Known materials", MP_theoretical: "Computed (MP)", EXT_MP: "External, MP IDs", EXT_CODED: "Other databases" };
+  $('#take-main').textContent = T[ref];
+  bindTips($('#ch-main'));
+}
 
-  function seg(el, items, current, onPick) {
-    el.innerHTML = "";
-    items.forEach(([key, label]) => {
-      const b = document.createElement("button");
-      b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", key === current);
-      b.addEventListener("click", () => { [...el.children].forEach((c) => c.setAttribute("aria-pressed", c === b)); onPick(key); });
-      el.appendChild(b);
-    });
-  }
-  function svgEl(w, h, inner, label) {
-    return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${inner}</svg>`;
-  }
-
-  /* ---------- 1. main comparison ---------- */
-  let ref = "MP_known";
-  function drawMain() {
-    const rows = D.main[ref]; const W = 760, rowH = 46, L = 250, R = 150, top = 20;
-    const H = top + rows.length * rowH + 10;
-    let s = "";
-    [0, 0.25, 0.5, 0.75, 1].forEach((t) => {
-      const x = L + t * (W - L - R);
-      s += `<line x1="${x}" x2="${x}" y1="${top - 6}" y2="${H - 10}" stroke="${css("--line")}" stroke-width="1"/>`;
-      s += `<text x="${x}" y="${top - 10}" text-anchor="middle" class="t-muted t-data">${t === 0 ? "0" : pct(t)}</text>`;
-    });
-    rows.forEach((r, i) => {
-      const y = top + i * rowH + rowH / 2;
-      const isH = r.m === "hhi_p"; const sc = isH ? 10000 : 1;
-      const xg = L + (r.g / sc) * (W - L - R), xk = L + (r.k / sc) * (W - L - R);
-      const fmt = (v) => isH ? Math.round(v).toLocaleString("en-US") : pct(v);
-      s += `<text x="0" y="${y + 4}">${MLAB[r.m]}${isH ? " ⁽¹⁾" : ""}</text>`;
-      s += `<line x1="${xk}" x2="${xg}" y1="${y}" y2="${y}" stroke="${css("--muted")}" stroke-width="2" opacity=".5"/>`;
-      s += `<circle cx="${xk}" cy="${y}" r="6.5" fill="${css("--known")}"/><circle cx="${xg}" cy="${y}" r="6.5" fill="${css("--gnome")}"/>`;
-      const lx = Math.min(xk, xg) - 10, rx = Math.max(xk, xg) + 10;
-      s += `<text x="${lx}" y="${y + 4}" text-anchor="end" class="t-data" style="fill:${css(xk < xg ? "--known" : "--gnome")}">${fmt(Math.min(r.k, r.g) === r.k ? r.k : r.g)}</text>`;
-      s += `<text x="${rx}" y="${y + 4}" class="t-data" style="fill:${css(xk < xg ? "--gnome" : "--known")}">${fmt(Math.max(r.k, r.g) === r.g ? r.g : r.k)}</text>`;
-      const d = isH ? `+${Math.round(r.d).toLocaleString("en-US")}` : `${r.d >= 0 ? "+" : ""}${(100 * r.d).toFixed(1)} pts`;
-      const ci = isH ? `[${Math.round(r.lo)}, ${Math.round(r.hi)}]` : `[${(100 * r.lo).toFixed(1)}, ${(100 * r.hi).toFixed(1)}]`;
-      s += `<text x="${W}" y="${y}" text-anchor="end" class="t-data">${d}</text>`;
-      s += `<text x="${W}" y="${y + 14}" text-anchor="end" class="t-data t-muted">${ci}</text>`;
-    });
-    $("mainChart").innerHTML = `<div class="tscroll">${svgEl(W, H, s, "GNoME versus " + GLAB[ref])}</div>`;
-    $("refName").textContent = GLAB[ref] + " (matched)";
-    const cov = D.cov[ref];
-    $("mainNote").textContent = `Right column: difference, with 95% confidence interval in brackets. Comparison covers ${pct(cov, 1)} of GNoME. ⁽¹⁾ HHI runs from 0 to 10,000 (2011 production data); higher means production is concentrated in fewer countries.`;
-  }
-  seg($("refSeg"), [["MP_known", "Known materials"], ["MP_theoretical", "Computed (MP)"], ["EXT_CODED", "Other databases"]], ref, (k) => { ref = k; drawMain(); });
-
-  /* ---------- 2. periodic table ---------- */
-  let mode = "enr", sel = "Dy";
-  const hexToRgb = (h) => { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map((c) => c + c).join(""); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-  const mix = (a, b, t) => { const A = hexToRgb(a), B = hexToRgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`; };
-  const lum = (c) => { const m = c.match(/\d+/g).map(Number); return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) / 255; };
-  function colour(e) {
-    const soft = css("--soft");
-    if (mode === "enr") {
-      if (e.lg == null) return null;
-      const t = Math.max(-4, Math.min(4, e.lg)) / 4;
-      return t >= 0 ? mix(soft, css("--gnome"), t) : mix(soft, css("--known"), -t);
-    }
-    const v = mode === "top" ? e.ts : e.cn;
-    if (v == null) return null;
-    return mix(soft, css("--supply"), Math.min(1, v));
-  }
-  function drawScale() {
-    const soft = css("--soft");
-    if (mode === "enr") {
-      $("scaleBar").style.background = `linear-gradient(90deg, ${css("--known")}, ${soft}, ${css("--gnome")})`;
-      $("scaleEnds").innerHTML = "<span>16× less in GNoME</span><span>same</span><span>16× more</span>";
-    } else {
-      $("scaleBar").style.background = `linear-gradient(90deg, ${soft}, ${css("--supply")})`;
-      $("scaleEnds").innerHTML = `<span>0%</span><span>${mode === "top" ? "largest producer's share" : "China's share"}</span><span>100%</span>`;
+/* periodic table */
+function ratioOf(e){ const v = D.els[e]; if (!v) return null; if (S.pt === 'n') return v.lg != null ? {r: Math.pow(2, v.lg), lo: Math.pow(2, v.lo), hi: Math.pow(2, v.hi)} : null; return v.rt != null ? {r: v.rt, lo: v.rtlo, hi: v.rthi} : null; }
+function hexToRgb(h){ h = h.replace('#',''); return [0,2,4].map(i => parseInt(h.substr(i,2),16)); }
+function mixHex(a, b, t){ const A = hexToRgb(a), B = hexToRgb(b); return 'rgb(' + A.map((v,i) => Math.round(v + (B[i]-v)*t)).join(',') + ')'; }
+function cellColor(r){
+  const mid = css('--mid') || '#ECECE8', g = css('--g'), k = css('--k');
+  const L = Math.max(-4, Math.min(4, Math.log2(r)));
+  return L >= 0 ? mixHex(mid, g, L/4) : mixHex(mid, k, -L/4);
+}
+function lum(c){ const m = c.match(/\d+/g).map(Number).map(v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); }); return .2126*m[0] + .7152*m[1] + .0722*m[2]; }
+function renderPT(){
+  const pt = $('#pt'); let html = '';
+  const cells = {}; Object.entries(D.els).forEach(([e, v]) => { cells[v.row + '-' + v.col] = e; });
+  for (let row = 1; row <= 10; row++){
+    if (row === 8){ html += '<div class="gap"></div>'; continue; }
+    for (let col = 1; col <= 18; col++){
+      const e = cells[row + '-' + col];
+      if (!e){ html += '<div aria-hidden="true"></div>'; continue; }
+      const v = D.els[e], q = ratioOf(e), rad = (v.f || []).includes('rad');
+      if (!q){ html += `<button type="button" class="el na" disabled aria-label="${esc(v.name)}: not enough data"><span class="s">${e}</span></button>`; continue; }
+      const bg = cellColor(q.r), dark = lum(bg) < .23;
+      const txt = q.r >= 100 ? Math.round(q.r) + '×' : q.r >= 10 ? q.r.toFixed(0) + '×' : q.r.toFixed(1) + '×';
+      html += `<button type="button" class="el${rad ? ' rad' : ''}" data-el="${e}" aria-pressed="${e === S.el}" aria-label="${esc(v.name)}, ratio ${q.r.toFixed(1)}" style="background:${bg};color:${dark ? '#fff' : '#18202B'}"><span class="s">${e}</span><span class="r">${txt}</span></button>`;
     }
   }
-  function buildPT() {
-    const pt = $("pt"); pt.innerHTML = "";
-    const cells = Object.entries(D.els).filter(([, e]) => e.row <= 7 || e.row >= 9);
-    const place = (el, row, col) => { el.style.gridRow = row + (row >= 9 ? 0 : 0); el.style.gridColumn = col; pt.appendChild(el); };
-    cells.forEach(([sym, e]) => {
-      if (e.row <= 7 && e.col == null) return;
-      const b = document.createElement("button"); b.type = "button"; b.dataset.sym = sym;
-      b.innerHTML = `<small>${e.z}</small>${sym}`;
-      const has = mode === "enr" ? e.lg != null : (e.ts != null);
-      b.setAttribute("aria-label", `${e.name}`);
-      b.setAttribute("aria-pressed", sym === sel);
-      const c = colour(e);
-      if (c) { b.style.background = c; b.style.color = lum(c) < 0.5 ? "#fff" : "#17202a"; }
-      else { b.dataset.nodata = ""; b.style.background = ""; b.style.color = ""; }
-      if (e.lg != null || e.ts != null) b.addEventListener("click", () => { sel = sym; buildPT(); drawDetail(); });
-      else b.disabled = true;
-      place(b, e.row >= 9 ? e.row + 1 : e.row, e.col);
-    });
-    const gap = document.createElement("div"); gap.className = "gap"; gap.style.gridRow = 8; pt.appendChild(gap);
-    const n1 = document.createElement("div"); n1.className = "fnote"; n1.textContent = "57–71"; place(n1, 6, 3);
-    const n2 = document.createElement("div"); n2.className = "fnote"; n2.textContent = "89–103"; place(n2, 7, 3);
-  }
-  function drawDetail() {
-    const e = D.els[sel]; const F = new Set(e.f || []);
-    const chip = (k, l) => `<span class="chip${F.has(k) ? " on" : ""}">${l}</span>`;
-    let rows = "";
-    if (e.lg != null) {
-      const x = Math.pow(2, e.lg), lo = Math.pow(2, e.lo), hi = Math.pow(2, e.hi);
-      const f = (v) => v >= 10 ? v.toFixed(0) : v >= 1 ? v.toFixed(1) : v.toFixed(2);
-      rows += `<dt>GNoME vs known</dt><dd>${f(x)}× <span class="muted">[${f(lo)}–${f(hi)}]</span></dd>`;
-      rows += `<dt>In GNoME</dt><dd>${e.ng.toLocaleString("en-US")} compounds</dd>`;
-      rows += `<dt>In known</dt><dd>${e.nk.toLocaleString("en-US")} compounds</dd>`;
-    } else rows += `<dt>GNoME vs known</dt><dd>no data</dd>`;
-    if (e.ts != null) {
-      rows += `<dt>Largest producer</dt><dd>${esc(e.top)}, ${pct(e.ts)}</dd>`;
-      rows += `<dt>China's share</dt><dd>${pct(e.cn)}</dd>`;
-      rows += `<dt>HHI (2025)</dt><dd>${e.hhi.toLocaleString("en-US")}</dd>`;
-      rows += `<dt>USGS source</dt><dd>${esc(e.src)}${e.px ? " ⁽ᵃ⁾" : ""}</dd>`;
-    } else rows += `<dt>Production</dt><dd>no USGS world figure</dd>`;
-    $("detail").innerHTML = `
-      <div style="display:flex;gap:14px;align-items:baseline"><span class="sym">${sel}</span><div><div style="font-weight:600">${esc(e.name)}</div><div class="muted num" style="font-size:12px">Z = ${e.z}</div></div></div>
-      <div class="chips">${chip("eu", "EU critical")}${chip("us", "US critical")}${chip("ree", "Rare earth")}${chip("f4", "Frozen 4f")}${chip("pgm", "Pt group")}${chip("rad", "Radioactive")}</div>
-      <dl>${rows}</dl>
-      ${e.px ? `<p class="chartnote">⁽ᵃ⁾ USGS reports this element as part of a group, so the group's country pattern is used.</p>` : ""}
-      ${F.has("rad") ? `<p class="chartnote">Radioactive elements are very rare among known materials, so their ratios are large and uncertain.</p>` : ""}`;
-  }
-  seg($("modeSeg"), [["enr", "GNoME vs known use"], ["top", "Largest producer share"], ["cn", "China's share"]], mode, (k) => { mode = k; drawScale(); buildPT(); });
+  pt.innerHTML = html;
+  pt.querySelectorAll('.el[data-el]').forEach(b => b.addEventListener('click', () => { S.el = b.dataset.el; S.clicked = true; renderPT(); }));
+  if (!S.clicked){ const sel = pt.querySelector('.el[aria-pressed="true"]'); if (sel) sel.classList.add('invite'); }
+  $('#ramp').style.background = `linear-gradient(90deg, ${cellColor(1/16)}, ${cellColor(1)}, ${cellColor(16)})`;
+  $('#ramp-ticks').textContent = '1/16 · 1 · 16 times as often';
+  renderDetail();
+}
+function renderDetail(){
+  const e = S.el, v = D.els[e], q = ratioOf(e);
+  if (!q){ $('#detail').innerHTML = `<h3>${esc(v.name)}</h3><p class="note">Not enough compounds to compare with this matching.</p>`; return; }
+  const LAB = {eu:'EU critical list', us:'US critical list', ree:'Rare earth', f4:'Frozen-4f lanthanide', pgm:'Platinum-group metal', u:'+U metal', rad:'Radioactive'};
+  const tags = (v.f || []).map(t => `<span class="tag">${LAB[t] || t}</span>`).join('');
+  const method = S.pt === 'n' ? 'number of elements' : 'compound type';
+  const other = S.pt === 'n' ? (v.rt != null ? `${v.rt.toFixed(1)}× with compound-type matching` : '') : (v.lg != null ? `${Math.pow(2, v.lg).toFixed(1)}× with element-count matching` : '');
+  const word = q.r >= 1 ? 'more' : 'less';
+  $('#detail').innerHTML = `
+    <p class="sel">Selected element</p>
+    <h3>${esc(v.name)} <span style="color:var(--muted);font-size:20px">${e}</span></h3>
+    <div class="big">${q.r >= 100 ? Math.round(q.r) : q.r.toFixed(1)}×</div>
+    <div style="color:var(--ink2)">${q.r >= 1 ? 'as often' : 'as often (used less)'} in GNoME as in known materials matched by ${method}<br><span style="color:var(--muted);font-size:14px">95% CI ${q.lo.toFixed(1)} to ${q.hi.toFixed(1)}${other ? ' · ' + other : ''}</span></div>
+    <div class="tags">${tags}</div>
+    <dl>
+      ${v.sg != null ? `<dt>GNoME compounds with ${e}</dt><dd>${pct(v.sg,1)} (${(v.ng||0).toLocaleString('en')})</dd><dt>Known compounds with ${e}</dt><dd>${pct(v.sk,2)} (${(v.nk||0).toLocaleString('en')})</dd>` : ''}
+      ${v.top ? `<dt>Largest producer</dt><dd>${esc(v.top)}, ${pct(v.ts)}${v.px ? ' (group figure)' : ''}</dd><dt>China's share</dt><dd>${pct(v.cn || 0)}</dd><dt>Supply concentration (HHI)</dt><dd>${(v.hhi||0).toLocaleString('en')}</dd>` : '<dt>Supply data</dt><dd>Not available</dd>'}
+    </dl>
+    ${(v.f||[]).includes('rad') ? '<p class="note">Radioactive: very few known compounds, so the ratio is uncertain and of little practical use.</p>' : ''}`;
+}
 
-  /* ---------- 3a. decomposition ---------- */
-  function drawDec() {
-    const rows = D.dec.filter((r) => r.m !== "hhi_p"); const W = 460, L = 0, top = 6, rowH = 42;
-    const H = top + rows.length * rowH; const max = Math.max(...rows.map((r) => r.gap));
-    const sc = (v) => (v / max) * (W - 60);
-    let s = "";
-    rows.forEach((r, i) => {
-      const y = top + i * rowH;
-      s += `<text x="0" y="${y + 11}" class="t-muted" style="font-size:11.5px">${MLAB[r.m]}</text>`;
-      s += `<rect x="0" y="${y + 17}" width="${sc(r.mix)}" height="14" rx="2" fill="${css("--gnome")}" opacity=".35"/>`;
-      s += `<rect x="${sc(r.mix)}" y="${y + 17}" width="${sc(r.within)}" height="14" rx="2" fill="${css("--gnome")}"/>`;
-      s += `<text x="${sc(r.gap) + 6}" y="${y + 28}" class="t-data">${pct(r.share)} type</text>`;
-    });
-    $("decChart").innerHTML = svgEl(W, H, s, "Gap decomposition");
-  }
-  /* ---------- 3b. random-choice ratios ---------- */
-  let fam = "rare earths";
-  function drawUni() {
-    const rows = D.uni.filter((r) => r.fam === fam); const W = 460, L = 175, top = 22, rowH = 30;
-    const H = top + rows.length * rowH + 4; const max = 2;
-    const sc = (v) => L + (Math.min(v, max) / max) * (W - L - 50);
-    let s = "";
-    [0, 0.5, 1, 1.5, 2].forEach((t) => {
-      s += `<line x1="${sc(t)}" x2="${sc(t)}" y1="${top - 6}" y2="${H}" stroke="${css(t === 1 ? "--muted" : "--line")}" ${t === 1 ? 'stroke-dasharray="3 3"' : ""}/>`;
-      s += `<text x="${sc(t)}" y="${top - 10}" text-anchor="middle" class="t-muted t-data">${t.toFixed(1)}</text>`;
-    });
-    rows.forEach((r, i) => {
-      const y = top + i * rowH + rowH / 2; const c = r.grp === "GNoME" ? css("--gnome") : r.grp === "MP_known" ? css("--known") : css("--muted");
-      s += `<text x="0" y="${y + 4}">${GLAB[r.grp]}</text>`;
-      s += `<line x1="${sc(0)}" x2="${sc(r.ratio)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="2"/>`;
-      s += `<circle cx="${sc(r.ratio)}" cy="${y}" r="5.5" fill="${c}"/>`;
-      s += `<text x="${sc(r.ratio) + 10}" y="${y + 4}" class="t-data">${r.ratio.toFixed(2)}</text>`;
-    });
-    $("uniChart").innerHTML = svgEl(W, H, s, "Observed use divided by random-choice expectation");
-  }
-  seg($("famSeg"), [["rare earths", "Rare earths"], ["f-in-core lanthanides", "Frozen-4f"], ["Pt-group metals", "Pt group"]], fam, (k) => { fam = k; drawUni(); });
+/* decomposition */
+function renderDec(){
+  const order = ['has_ree','has_f_in_core','has_pgm','crm_eu_atom'];
+  const W = wOf('ch-dec'), compact = W < 560, labW = compact ? 0 : Math.min(180, Math.round(W*0.38)), rowH = compact ? 56 : 46, plotW = W - labW - 12, top = 4, l0 = compact ? 16 : 0;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${top + order.length*rowH + 22}" role="img" aria-label="Share of the gap from type mix and within type">`;
+  [0,.25,.5,.75,1].forEach(t => { const x = labW + t*plotW; s += `<line class="gridline" x1="${x}" x2="${x}" y1="${top}" y2="${top+order.length*rowH}"/><text class="lbl2" x="${x}" y="${top+order.length*rowH+16}" text-anchor="middle">${pct(t)}</text>`; });
+  order.forEach((m, i) => {
+    const d = D.dec2.find(x => x.m === m); const mix = d[S.dec], y = top + i*rowH + 10 + l0, wm = mix*plotW;
+    s += compact ? `<text class="lbl" x="0" y="${y-5}">${SHORT[m]}</text>` : `<text class="lbl" x="0" y="${y+15}">${SHORT[m]}</text>`;
+    s += `<rect class="mark" tabindex="0" x="${labW}" y="${y}" width="${wm-1}" height="20" rx="4" fill="var(--k)" data-tip="<b>${SHORT[m]}</b><br>Type mix: ${pct(mix)} of the gap"/>`;
+    s += `<rect class="mark" tabindex="0" x="${labW+wm+1}" y="${y}" width="${plotW-wm-1}" height="20" rx="4" fill="var(--g)" data-tip="<b>${SHORT[m]}</b><br>Within type: ${pct(1-mix)} of the gap"/>`;
+    s += `<text x="${labW+6}" y="${y+14.5}" fill="#fff" font-size="12" font-weight="600">${pct(mix)}</text>`;
+  });
+  $('#ch-dec').innerHTML = s + '</svg>'; bindTips($('#ch-dec'));
+}
 
-  /* ---------- 3c. margins ---------- */
-  let mref = "mp";
-  function drawMarg() {
-    const M = mref === "mp" ? D.marg : D.margOQ;
-    const items = [["has_f_in_core", "Frozen-4f lanthanide"], ["has_ree", "Rare earth"], ["has_u_element", "Hubbard-U element"]];
-    const W = 460, L = 150, top = 6, rowH = 54, H = top + items.length * rowH;
-    const sc = (v) => L + v * (W - L - 40);
-    let s = "";
-    items.forEach(([k, lab], i) => {
-      const m = M[k]; const y = top + i * rowH;
-      s += `<text x="0" y="${y + 17}">${lab}</text><text x="0" y="${y + 33}" class="t-muted t-data">odds ×${m.orr.toFixed(2)}</text>`;
-      s += `<rect x="${L}" y="${y + 6}" width="${sc(m.yes) - L}" height="13" rx="2" fill="${css("--gnome")}"/>`;
-      s += `<text x="${sc(m.yes) + 6}" y="${y + 17}" class="t-data">${pct(m.yes)}</text>`;
-      s += `<rect x="${L}" y="${y + 23}" width="${sc(m.no) - L}" height="13" rx="2" fill="${css("--muted")}" opacity=".45"/>`;
-      s += `<text x="${sc(m.no) + 6}" y="${y + 34}" class="t-data t-muted">${pct(m.no)}</text>`;
-    });
-    $("margChart").innerHTML = svgEl(W, H, s, "Share of GNoME compounds within 25 meV of the stability limit");
-    const f = M.has_f_in_core;
-    $("margNote").textContent = `Share of GNoME compounds within 25 meV/atom of the stability limit: with the element (dark) vs without (light). Median margin ${f.medy} vs ${f.medn} meV/atom for frozen-4f compounds. Odds ratios are matched on compound type.`;
-  }
-  seg($("margSeg"), [["mp", "vs Materials Project"], ["oq", "vs MP + OQMD"]], mref, (k) => { mref = k; drawMarg(); });
+/* random baseline */
+function renderUni(){
+  const fams = [['rare earths','Rare earths'],['f-in-core lanthanides','Frozen-4f lanthanides'],['Pt-group metals','Platinum-group metals']];
+  const grps = ['GNoME','MP_known','MP_theoretical','EXT_CODED'];
+  $('#leg-uni').innerHTML = grps.map(g => `<span><i class="sw" style="background:var(${GCOL[g]});border-radius:50%"></i>${GLAB[g]}</span>`).join('');
+  const W = wOf('ch-uni'), compact = W < 420, labW = compact ? 8 : Math.min(160, Math.round(W*0.4)), rowH = compact ? 62 : 50, top = 4, plotW = W - labW - 16, max = 2;
+  const x = v => labW + (v/max)*plotW;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${top + fams.length*rowH + 22}" role="img" aria-label="Use relative to random element choice">`;
+  [0,.5,1,1.5,2].forEach(t => s += `<line class="${t===1?'axis':'gridline'}" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${top+fams.length*rowH}" ${t===1?'stroke-dasharray="4 3" stroke-width="1.5"':''}/><text class="lbl2" x="${x(t)}" y="${top+fams.length*rowH+16}" text-anchor="middle">${t}</text>`);
+  fams.forEach(([f, lab], i) => {
+    const y = top + i*rowH + rowH/2;
+    s += (compact ? `<text class="lbl" x="0" y="${y-16}">${lab}</text>` : `<text class="lbl" x="0" y="${y+4}">${lab}</text>`) + `<line class="gridline" x1="${labW}" x2="${labW+plotW}" y1="${y}" y2="${y}"/>`;
+    grps.forEach((g, j) => { const u = D.uni.find(q => q.fam === f && q.grp === g); if (!u) return; const dy = (j-1.5)*5;
+      s += `<circle class="mark" tabindex="0" cx="${x(u.ratio)}" cy="${y+dy}" r="6.5" fill="var(${GCOL[g]})" stroke="var(--surface)" stroke-width="2" data-tip="<b>${GLAB[g]}</b>, ${lab.toLowerCase()}<br>Observed ${pct(u.obs)} vs random ${pct(u.exp)}<br>Ratio ${f2(u.ratio)}"/>`; });
+  });
+  $('#ch-uni').innerHTML = s + '</svg>'; bindTips($('#ch-uni'));
+}
 
-  /* ---------- 3d. big region ---------- */
-  function drawBig() {
-    const groups = ["GNoME", "EXT_CODED", "MP_theoretical"]; const strata = [["4_intermetallic", "4 elements"], ["5_intermetallic", "5 or more"]];
-    const W = 460, L = 80, top = 4, blockH = 74, H = top + strata.length * blockH;
-    const sc = (v) => L + v * (W - L - 190);
-    let s = "";
-    strata.forEach(([st, lab], j) => {
-      const y0 = top + j * blockH;
-      s += `<text x="0" y="${y0 + 14}" style="font-weight:600">${lab}</text>`;
-      groups.forEach((g, i) => {
-        const r = D.big.find((b) => b.st === st && b.grp === g); if (!r) return;
-        const y = y0 + 4 + i * 22; const c = g === "GNoME" ? css("--gnome") : css("--muted");
-        s += `<rect x="${L}" y="${y}" width="${sc(r.ree) - L}" height="14" rx="2" fill="${c}" ${g === "GNoME" ? "" : 'opacity=".55"'}/>`;
-        s += `<text x="${sc(r.ree) + 6}" y="${y + 11}" class="t-data">${pct(r.ree)} · ${GLAB[g]} <tspan class="t-muted">(${r.n.toLocaleString("en-US")})</tspan></text>`;
-      });
-    });
-    $("bigChart").innerHTML = svgEl(W, H, s, "Rare-earth share in large metal-only compounds");
-  }
+/* stability */
+function renderStab(){
+  const M = S.hull === 'mp' ? D.marg : D.margOQ, fams = [['has_f_in_core','Frozen-4f lanthanides'],['has_ree','Rare earths'],['has_u_element','+U metals']];
+  const rows = fams.map(([f, lab]) => ({label: lab, a: M[f].yes, b: M[f].no,
+    tipA: `<b>${lab}</b>, with<br>Near-hull: ${pct(M[f].yes,1)}<br>Median margin ${M[f].medy} meV/atom`,
+    tipB: `<b>${lab}</b>, without<br>Near-hull: ${pct(M[f].no,1)}<br>Median margin ${M[f].medn} meV/atom`}));
+  document.documentElement.style.setProperty('--mutedsw', css('--muted'));
+  $('#ch-stab').innerHTML = pairBars(rows, {id:'ch-stab', ca:'--g', cb:'--mutedsw', max:1, labW:170, fmt:v => pct(v), aria:'Share near the hull'});
+  bindTips($('#ch-stab'));
+  const h = S.hull === 'mp' ? 'e_decomp_mp' : 'e_decomp_mp_oqmd';
+  const cl = f => D.clOR.find(x => x.f === f && x.h === h && x.cl === 'ln_template');
+  $('#tab-or').innerHTML = `<table class="tbl"><thead><tr><th>Family</th><th class="n">Odds ratio</th><th class="n">95% CI</th><th class="n">95% CI, near-copies together</th></tr></thead><tbody>` +
+    fams.map(([f, lab]) => { const c = cl(f); return `<tr><td>${lab}</td><td class="n">${f2(M[f].orr)}</td><td class="n">${f2(M[f].lo)} to ${f2(M[f].hi)}</td><td class="n">${c ? f2(c.lo) + ' to ' + f2(c.hi) : '–'}</td></tr>`; }).join('') + '</tbody></table>';
+}
 
-  /* ---------- 4. applications ---------- */
-  let app = "cathode";
-  const APPLAB = { cathode: "Battery cathodes", perovskite: "Solar perovskites", thermoelectric: "Thermoelectrics" };
-  const PERF = { cathode: ["Wh/kg", (v) => v.toFixed(0)], perovskite: ["eV from 1.34", (v) => Math.abs(v).toFixed(2)], thermoelectric: ["zT", (v) => v.toFixed(2)] };
-  const SUBLAB = { cathode: "Working ion", perovskite: "Model", thermoelectric: "Temperature" };
-  function drawApp() {
-    const rows = D.eg.filter((r) => r.app === app && r.m === "crm_eu_atom");
-    const W = 460, L = 130, top = 6, rowH = 56, H = top + rows.length * rowH;
-    const sc = (v) => L + v * (W - L - 50);
-    let s = "";
-    rows.forEach((r, i) => {
-      const y = top + i * rowH;
-      s += `<text x="0" y="${y + 17}">${r.sub === "all" ? "All candidates" : "High confidence"}</text><text x="0" y="${y + 33}" class="t-muted t-data">n=${r.n.toLocaleString("en-US")}</text>`;
-      s += `<rect x="${L}" y="${y + 6}" width="${sc(r.s) - L}" height="14" rx="2" fill="${css("--gnome")}"/><text x="${sc(r.s) + 6}" y="${y + 17}" class="t-data">${pct(r.s)}</text>`;
-      s += `<rect x="${L}" y="${y + 24}" width="${sc(r.k) - L}" height="14" rx="2" fill="${css("--known")}"/><text x="${sc(r.k) + 6}" y="${y + 35}" class="t-data">${pct(r.k)}</text>`;
-    });
-    $("appChart").innerHTML = svgEl(W, H, s, "EU critical share, shortlist vs known") +
-      `<div class="legend" style="margin-top:6px"><span><i style="background:var(--gnome)"></i>Shortlist</span><span><i style="background:var(--known)"></i>Known (matched)</span></div>`;
-    const A = D.alt.filter((r) => r.app === app); const [unit, fmt] = PERF[app];
-    const better = app === "perovskite" ? (h, l) => Math.abs(l) <= Math.abs(h) : (h, l) => l >= h;
-    let t = `<thead><tr><th>${SUBLAB[app]}</th><th>Candidates</th><th>High risk</th><th>With ≥1 alternative</th><th>Median alternatives</th><th>Median performance, high / low risk (${unit})</th><th></th></tr></thead><tbody>`;
-    A.forEach((r) => {
-      const ok = better(r.ph, r.pl);
-      t += `<tr><td>${esc(r.sub)}</td><td class="num">${r.n.toLocaleString("en-US")}</td><td class="num">${pct(r.hr)}</td><td class="num">${pct(r.a1)}</td><td class="num">${r.ma}</td><td class="num">${fmt(r.ph)} / ${fmt(r.pl)}</td><td>${ok ? '<span class="pill ok">low risk performs as well</span>' : '<span class="pill warn">high risk performs better</span>'}</td></tr>`;
-    });
-    $("altTable").innerHTML = t + "</tbody>";
-  }
-  seg($("appSeg"), Object.entries(APPLAB), app, (k) => { app = k; drawApp(); });
+/* applications */
+function renderEG(){
+  const app = S.app, ms = ['crm_eu_atom','has_ree','has_f_in_core','has_pgm'];
+  let rows;
+  if (S.egm === 'n') rows = ms.map(m => { const r = D.eg.find(x => x.app === app && x.sub === 'all' && x.m === m); return r && {label: SHORT[m], a: r.s, b: r.k, tipA:`<b>Shortlist</b> (${r.n.toLocaleString('en')} candidates)<br>${MLAB[m]}: ${pct(r.s,1)}`, tipB:`<b>Known materials</b>, same number of elements<br>${MLAB[m]}: ${pct(r.k,1)}`}; }).filter(Boolean);
+  else rows = ms.map(m => { const r = D.egT.find(x => x.app === app && x.sub === 'all' && x.m === m); return r && {label: SHORT[m], a: r.s, b: r.k, tipA:`<b>Shortlist</b> on the common support (${pct(r.cov)} of candidates)<br>${MLAB[m]}: ${pct(r.s,1)}`, tipB:`<b>Known materials</b>, same compound types<br>${MLAB[m]}: ${pct(r.k,1)}<br>Gap ${r.s-r.k>0?'+':''}${f3(r.s-r.k)} (95% CI ${f3(r.lo)} to ${f3(r.hi)})`}; }).filter(Boolean);
+  $('#ch-eg').innerHTML = pairBars(rows, {id:'ch-eg', ca:'--g', cb:'--k', max:1, labW:200, fmt:v => pct(v), aria:'Shortlist versus known materials'});
+  bindTips($('#ch-eg'));
+  $('#note-eg').textContent = S.egm === 'n' ? 'Matching by number of elements is the weaker matching. Switch to compound type to see the smaller, more reliable gaps.' : 'Matched by compound type, the gaps are much smaller. For thermoelectrics the rare-earth excess disappears.';
+  // alternatives table
+  const subs = D.alt.filter(a => a.app === app);
+  const pick = (sub) => { if (S.rule === 'base') { const a = subs.find(x => x.sub === sub); return {a1: a.a1, ma: a.ma, n: Math.round(a.hr*a.n)}; }
+    const conf = (S.rule === 'conf' || S.rule === 'both') ? .9 : .5, same = (S.rule === 'same' || S.rule === 'both');
+    const r = D.altS.find(x => x.app === app && x.sub === sub && x.conf === conf && x.same === same); return r ? {a1: r.a1, ma: r.ma, n: r.n} : null; };
+  const unit = app === 'cathode' ? 'Wh/kg' : app === 'thermoelectric' ? 'zT' : 'eV from 1.34';
+  const fmtP = v => app === 'perovskite' ? Math.abs(v).toFixed(2) : app === 'thermoelectric' ? v.toFixed(2) : Math.round(v);
+  $('#tab-alt').innerHTML = `<table class="tbl"><thead><tr><th>Subset</th><th class="n">Candidates</th><th class="n">High-risk</th><th class="n">High-risk with an alternative</th><th class="n">Median alternatives</th><th class="n">Median performance, high / low risk (${unit})</th></tr></thead><tbody>` +
+    subs.map(a => { const p = pick(a.sub); const share = p && p.a1 != null && p.n > 0 ? p.a1 : null;
+      return `<tr><td>${esc(a.sub)}</td><td class="n">${a.n.toLocaleString('en')}</td><td class="n">${pct(a.hr)}</td><td class="n">${share == null ? '<span style="color:var(--muted)">too few</span>' : `<span class="pill">${pct(share)}</span><span class="meter" aria-hidden="true"><i style="width:${100*share}%"></i></span>`}</td><td class="n">${p && p.ma != null && p.n > 0 ? p.ma : '–'}</td><td class="n">${fmtP(a.ph)} / ${fmtP(a.pl)}</td></tr>`; }).join('') + '</tbody></table>';
+}
 
-  /* ---------- 5. countries ---------- */
-  function drawCty() {
-    const rows = D.prof.filter((r) => r.c !== "Other Countries").slice(0, 9);
-    const W = 760, L = 140, top = 4, rowH = 34, H = top + rows.length * rowH;
-    const max = Math.max(...rows.map((r) => Math.max(r.g, r.k)));
-    const sc = (v) => L + (v / max) * (W - L - 60);
-    let s = "";
-    rows.forEach((r, i) => {
-      const y = top + i * rowH;
-      s += `<text x="0" y="${y + 19}">${esc(r.c)}</text>`;
-      s += `<rect x="${L}" y="${y + 4}" width="${sc(r.g) - L}" height="11" rx="2" fill="${css("--gnome")}"/><text x="${sc(r.g) + 6}" y="${y + 13}" class="t-data">${pct(r.g, 1)}</text>`;
-      s += `<rect x="${L}" y="${y + 17}" width="${sc(r.k) - L}" height="11" rx="2" fill="${css("--known")}"/><text x="${sc(r.k) + 6}" y="${y + 27}" class="t-data t-muted">${pct(r.k, 1)}</text>`;
-    });
-    $("ctyChart").innerHTML = `<div class="legend" style="margin-bottom:8px"><span><i style="background:var(--gnome)"></i>GNoME</span><span><i style="background:var(--known)"></i>Known (matched)</span></div><div class="tscroll">${svgEl(W, H, s, "Supply share by country")}</div>`;
-    const c = D.cc;
-    $("ccNote").textContent = `On common support, ${pct(c.conc_frac.g)} of the atoms in GNoME compounds come from elements whose production is highly concentrated, against ${pct(c.conc_frac.k)} for known materials. China's average share of supply is ${pct(c.china_frac.g)} vs ${pct(c.china_frac.k)}.`;
-  }
+/* countries */
+function renderCty(){
+  const P = D.prof.filter(p => p.c !== 'Other Countries').sort((a, b) => b.g - a.g).slice(0, 10);
+  const max = Math.max(...P.flatMap(p => [p.g, p.k])) * 1.1;
+  const rows = P.map(p => ({label: p.c, a: p.g, b: p.k, tipA:`<b>GNoME</b><br>${esc(p.c)}: ${pct(p.g,1)} of supply`, tipB:`<b>Known materials</b> (matched)<br>${esc(p.c)}: ${pct(p.k,1)} of supply`}));
+  $('#ch-cty').innerHTML = pairBars(rows, {id:'ch-cty', ca:'--g', cb:'--k', max, labW:150, ticks:[0,.1,.2,.3,.4].filter(t => t <= max), fmt:v => pct(v,1), aria:'Share of supply by country'});
+  bindTips($('#ch-cty'));
+  const c = D.cc;
+  $('#tab-cc').innerHTML = `<table class="tbl"><thead><tr><th>Measure (common support)</th><th class="n">GNoME</th><th class="n">Known</th></tr></thead><tbody>
+    <tr><td>Supply concentration, HHI (0 to 10,000)</td><td class="n">${Math.round(c.hhi_new.g).toLocaleString('en')}</td><td class="n">${Math.round(c.hhi_new.k).toLocaleString('en')}</td></tr>
+    <tr><td>Share of supply from China</td><td class="n">${pct(c.china_frac.g)}</td><td class="n">${pct(c.china_frac.k)}</td></tr>
+    <tr><td>Share of atoms from elements where one country produces half or more</td><td class="n">${pct(c.conc_frac.g)}</td><td class="n">${pct(c.conc_frac.k)}</td></tr></tbody></table>`;
+}
 
-  $("nullTxt").textContent = `${pct(Math.min(...Object.values(D.null)))}–${pct(Math.max(...Object.values(D.null)))}`;
+/* checks */
+function renderChecks(){
+  const cut = D.cut.find(x => x.v.startsWith('known >= 100, without') && x.m === 'has_ree');
+  const main = D.cut.find(x => x.v === 'known >= 100 per type' && x.m === 'has_ree');
+  const c1 = D.clGap.find(x => x.m === 'has_ree' && x.cl === 'ln_template'), c2 = D.clGap.find(x => x.m === 'has_ree' && x.cl === 'family');
+  const dup = D.rob.find(x => x.c === 'duplicates removed' && x.m === 'has_ree'), rad = D.rob.find(x => x.c === 'radioactive removed' && x.m === 'has_ree');
+  const d = D.dec2.find(x => x.m === 'has_ree');
+  const dn = D.dens.find(x => x.flag === 'has_f_in_core' && /< 25/.test(x.measure) && /density/.test(x.measure));
+  const rows = [
+    ['Main comparison (common support)', `+${f3(main.d)}`, `95% CI ${f3(main.lo)} to ${f3(main.hi)}, ${pct(main.cov,1)} of GNoME`],
+    ['Without the thin 4-element metal-only type (276 known compounds)', `+${f3(cut.d)}`, `Same result for cut-offs of 300, 500 and 1000 known compounds per type`],
+    ['Near-copies resampled together', `+${f3(c1.d)}`, `95% CI ${f3(c1.lo)} to ${f3(c1.hi)}; broader groups ${f3(c2.lo)} to ${f3(c2.hi)}`],
+    ['Duplicate formulas removed', `+${f3(dup.d)}`, 'Almost no change'],
+    ['Radioactive elements removed', `+${f3(rad.d)}`, 'Slightly larger gap'],
+    ['Share of the gap from type mix', pct(d.a), `${pct(d.b)} with known-material weights, ${pct(d.avg)} on average`],
+    ['Frozen-4f stability, MP entries per system controlled', f2(dn.value_with), `Odds ratio, 95% CI ${f2(dn.ci_low)} to ${f2(dn.ci_high)} (1.83 without the control)`]
+  ];
+  $('#tab-checks').innerHTML = `<table class="tbl"><thead><tr><th>Check</th><th class="n">Rare-earth gap or value</th><th>What it shows</th></tr></thead><tbody>` + rows.map(r => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td>${r[2]}</td></tr>`).join('') + '</tbody></table>';
+}
 
-  function drawAll() { drawMain(); drawScale(); buildPT(); drawDetail(); drawDec(); drawUni(); drawMarg(); drawBig(); drawApp(); drawCty(); }
-  drawAll();
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
-  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+function render(){ renderMain(); renderPT(); renderDec(); renderUni(); renderStab(); renderEG(); renderCty(); renderChecks(); }
+render();
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(render, 150); });
+
+/* nav highlight */
+const links = [...document.querySelectorAll('.bar nav a')];
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), {rootMargin:'-40% 0px -55% 0px'});
+document.querySelectorAll('section[id], footer[id]').forEach(s => io.observe(s));
+
+/* theme toggle */
+const tb = $('#theme');
+function curDark(){ const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+function setLabel(){ tb.textContent = curDark() ? 'Light mode' : 'Dark mode'; }
+tb.addEventListener('click', () => { document.documentElement.dataset.theme = curDark() ? 'light' : 'dark'; setLabel(); render(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { setLabel(); render(); });
+setLabel();
 })();
 </script>
-
 </body>
 </html>
